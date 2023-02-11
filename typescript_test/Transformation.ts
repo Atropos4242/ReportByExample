@@ -2,41 +2,43 @@ import { Dataset } from "./Dataset"
 import { DataSource } from "./DataSource"
 import { Column, Row, Table } from "./Table"
 
-interface Transformation {
-    "name" : string,
-    "type" : string
+export type JoinConditonFunction = ( row_A : Row, row_B : Row ) => boolean;
+
+export class Join {
+    sourceA : string;
+    sourceB : string;
+    join_conditions: JoinConditonFunction;
+
+    constructor( sourceA, sourceB, join_conditions ) {
+        this.sourceA=sourceA;
+        this.sourceB=sourceB;
+        this.join_conditions=join_conditions;
+    }
 }
 
-export interface Join extends Transformation {
-    "sourceA" : string,
-    "sourceB" : string,
-    "sourceResult" : string,    
-    "join_conditions": JoinCondition[]    
-}
+export class GroupColumn {
+    col_nr: number;
+    name: string;
+    group_mode: string;
 
-export interface Group extends Transformation {
-    "source" : string,
-    "sourceResult" : string,      
-    "group_columns": 
-    [
-        {
-            "col_nr": number, 
-            "name":string,
-            "group_mode": string 
-        }
-    ]
-}
-
-export interface Order extends Transformation {
-    "source" : string,
-    "sourceResult" : string,    
-    "order_columns": OrderCondition[]    
+    constructor( col_nr : number, name : string, group_mode : string ) {
+        this.col_nr=col_nr;
+        this.name = name;
+        this.group_mode=group_mode; 
+    }
 }
 
 export class OrderCondition {
     col_nr : number;
     name : string;
     order_mode : string;
+
+    constructor(col_nr : number, name : string, order_mode : string ) {
+        this.col_nr=col_nr;
+        this.name=name;
+        this.order_mode=order_mode;
+    }
+
 }
 
 export interface ProjectCondition {
@@ -44,59 +46,42 @@ export interface ProjectCondition {
     name : string
 }
 
-export interface GroupCondition extends ProjectCondition{
-    group_mode : string
-}
-
-export interface JoinCondition {
-    srcA : {
-        col_name : string,
-        col_nr : number
-    },
-    srcB : {
-        col_name : string,
-        col_nr : number
-    },
-    operation : string    
-}
-
 export class RelationalTransform {
-    doTransformation( source : DataSource, trans : Join|Group|Order ) : string {
-        if( trans.type == "JOIN_FULL_TABLE_SCAN" ) {
-            return this.join(source, trans as Join);
-        }
-        if( trans.type == "GROUP" ) {
-            return this.group(source, trans as Group);
-        }
-        if( trans.type == "ORDER" ) {
-            return this.order(source, trans as Order);
-        }
+
+    join( source : DataSource, sourceResult : string,  join : Join ) : string {
+        console.log("Join: " + join.sourceA + " + " + join.sourceB + " -> " + sourceResult);
+        console.log("");
+
+        let result : Table = this.join_intern(sourceResult,source.getTable(join.sourceA),source.getTable(join.sourceB),join.join_conditions);
+        // console.log( result.toText());
+
+        return source.addTable(result);
     }
 
-    join( source : DataSource, join : Join ) : string {
-        for( let cond of join.join_conditions) {
-            cond.srcA.col_nr = source.getTable(join.sourceA).columns.find(x => x.name == cond.srcA.col_name).col_nr;
-            cond.srcB.col_nr = source.getTable(join.sourceB).columns.find(x => x.name == cond.srcB.col_name).col_nr;
-        }
-
-        console.log(join.name + " [" + join.type + "]");
-        console.log(join.sourceA + " + " + join.sourceB + " -> " + join.sourceResult);
-        for( let cond of join.join_conditions ) {
-            console.log( cond.srcA.col_name + " (" + cond.srcA.col_nr + ")" + " " + cond.operation + " " + cond.srcB.col_name + " (" + cond.srcB.col_nr + ")" )
+    order( source : DataSource, sourceResult : string, data : Table, order : OrderCondition[] ) : string {
+        console.log("Order: " + data.name + " -> " + sourceResult);
+        for( let o of order ) {
+            console.log( o.name + " (" + o.col_nr + ")" + " " + o.order_mode );
         }        
         console.log("");
 
-        let result : Table = this.join_intern(join.sourceResult,source.getTable(join.sourceA),source.getTable(join.sourceB),join.join_conditions);
-        //console.log( result.toText());
+        let result : Table = this.order_intern(sourceResult,data,order);
+        // console.log( result.toText());
 
         return source.addTable(result);
     }
 
-    order( source : DataSource, order : Order ) : string {
-        let result : Table = this.order_intern(order.sourceResult,source.getTable(order.source),order.order_columns);
-        //console.log( result.toText());
+    group( source : DataSource, sourceResult : string, data : Table, group : GroupColumn[] ) : string {
+        console.log("Group: " + data.name + " -> " + sourceResult);
+        for( let grp of group ) {
+            console.log( grp.name + " (" + grp.col_nr + ")" + " " + grp.group_mode );
+        }        
+        console.log("");
 
-        return source.addTable(result);
+        let result : Table =this.group_intern(sourceResult, data, group); 
+        // console.log( result.toText());
+
+        return source.addTable(result);        
     }
 
     order_intern( name : string, data : Table, orderCond : OrderCondition[]) : Table {   
@@ -128,17 +113,6 @@ export class RelationalTransform {
         return result;
     }
 
-    group( source : DataSource, group : Group ) : string {
-        console.log(group.name + " [" + group.type + "]");
-        console.log(group.source + " -> " + group.sourceResult);
-        for( let grp of group.group_columns ) {
-            console.log( grp.name + " (" + grp.col_nr + ")" + " " + grp.group_mode );
-        }        
-        console.log("");
-        
-        return source.addTable(this.group_intern(group.sourceResult,source.getTable(group.source),group.group_columns)); 
-    }
-
     project_intern( name : string, data : Table, prjCond : ProjectCondition[]) : Table {   
         let res_columns : Column[] = [];
         let keep_cols : number[] = [];
@@ -165,17 +139,14 @@ export class RelationalTransform {
         return result;        
     }
 
-    group_intern( name : string, data : Table, grpCond : GroupCondition[]) : Table {   
+    group_intern( name : string, data : Table, grpCond : GroupColumn[]) : Table {   
         let result : Table = data;
         let keys : any[] = []; //Liste der Spaltennummern der Group-Spalten
         let aggs : number[] = []; //Liste der Spaltennummern der Agg-Spalten
         let orderCond : OrderCondition[] = [];
         for( let gc of grpCond ) {
             if( gc.group_mode == "key" ) {
-                let oc : OrderCondition = new OrderCondition();
-                oc.col_nr=gc.col_nr;
-                oc.name=gc.name;
-                oc.order_mode='ASC';
+                let oc : OrderCondition = new OrderCondition(gc.col_nr, gc.name, 'ASC');
                 orderCond.push(oc);
                 keys.push(oc.col_nr);
             }
@@ -233,14 +204,14 @@ export class RelationalTransform {
         }                  
         //console.log( "new Row: " + sum + " " + count + " - " + newRow.row );
         groupResult.rows.push(newRow);
-        console.log( groupResult.toText());   
+        // console.log( groupResult.toText());   
 
         result = this.project_intern(name,groupResult,grpCond as ProjectCondition[]);
 
         return result;
     }
 
-    join_intern( name : string, dataA : Table, dataB : Table, joinCond : JoinCondition[]) : Table {        
+    join_intern( name : string, dataA : Table, dataB : Table, joinCond : JoinConditonFunction) : Table {        
         let res_columns : Column[] = [];
         let nr : number = 0;
         for( let col of dataA.columns) {
@@ -274,26 +245,13 @@ export class RelationalTransform {
         return result;
     }
 
-    checkCondition( conditions : JoinCondition[], row_A : Row, row_B : Row ) : boolean {
-        for( let key of conditions) {            
-            if( row_A.row[key.srcA.col_nr] == row_B.row[key.srcB.col_nr])  {
-                //console.log("checking " + key.col_nr_A + "/" + key.col_nr_B + " : " + row_A.row[key.col_nr_A] + "/" + row_B.row[key.col_nr_B] + "-> true");                
-            } else {
-                //console.log("checking " + key.col_nr_A + "/" + key.col_nr_B + " : " + row_A.row[key.col_nr_A] + "/" + row_B.row[key.col_nr_B] + "-> false");
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    checkConditionExpression( condition : (row_A : Row, row_B : Row) => boolean, row_A : Row, row_B : Row ) : boolean {
+    checkCondition( condition : (row_A : Row, row_B : Row) => boolean, row_A : Row, row_B : Row ) : boolean {
         let result : boolean = condition(row_A, row_B);
         if( result )  {
-            console.log("checking -> true");                
+            // console.log("checking -> true");                
             return true;
         } else {
-            console.log("checking -> false");
+            // console.log("checking -> false");
             return false;
         }
     }

@@ -1,8 +1,13 @@
 import { Dataset } from './Dataset';
 
-export interface Column {
+export class Column {
     col_nr : number;
     name : string;
+    constructor(col_nr : number, name : string ) {
+        this.col_nr=col_nr;
+        this.name=name;
+    }
+
 }
 
 export class Row {

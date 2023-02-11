@@ -1,6 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Table = exports.Row = void 0;
+exports.Table = exports.Row = exports.Column = void 0;
+class Column {
+    constructor(col_nr, name) {
+        this.col_nr = col_nr;
+        this.name = name;
+    }
+}
+exports.Column = Column;
 class Row {
     constructor() {
         this.row = new Array();

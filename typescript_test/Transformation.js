@@ -1,40 +1,57 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RelationalTransform = exports.OrderCondition = void 0;
+exports.RelationalTransform = exports.OrderCondition = exports.GroupColumn = exports.Join = void 0;
 const Table_1 = require("./Table");
+class Join {
+    constructor(sourceA, sourceB, join_conditions) {
+        this.sourceA = sourceA;
+        this.sourceB = sourceB;
+        this.join_conditions = join_conditions;
+    }
+}
+exports.Join = Join;
+class GroupColumn {
+    constructor(col_nr, name, group_mode) {
+        this.col_nr = col_nr;
+        this.name = name;
+        this.group_mode = group_mode;
+    }
+}
+exports.GroupColumn = GroupColumn;
 class OrderCondition {
+    constructor(col_nr, name, order_mode) {
+        this.col_nr = col_nr;
+        this.name = name;
+        this.order_mode = order_mode;
+    }
 }
 exports.OrderCondition = OrderCondition;
 class RelationalTransform {
-    doTransformation(source, trans) {
-        if (trans.type == "JOIN_FULL_TABLE_SCAN") {
-            return this.join(source, trans);
-        }
-        if (trans.type == "GROUP") {
-            return this.group(source, trans);
-        }
-        if (trans.type == "ORDER") {
-            return this.order(source, trans);
-        }
-    }
-    join(source, join) {
-        for (let cond of join.join_conditions) {
-            cond.srcA.col_nr = source.getTable(join.sourceA).columns.find(x => x.name == cond.srcA.col_name).col_nr;
-            cond.srcB.col_nr = source.getTable(join.sourceB).columns.find(x => x.name == cond.srcB.col_name).col_nr;
-        }
-        console.log(join.name + " [" + join.type + "]");
-        console.log(join.sourceA + " + " + join.sourceB + " -> " + join.sourceResult);
-        for (let cond of join.join_conditions) {
-            console.log(cond.srcA.col_name + " (" + cond.srcA.col_nr + ")" + " " + cond.operation + " " + cond.srcB.col_name + " (" + cond.srcB.col_nr + ")");
-        }
+    join(source, sourceResult, join) {
+        console.log("Join: " + join.sourceA + " + " + join.sourceB + " -> " + sourceResult);
         console.log("");
-        let result = this.join_intern(join.sourceResult, source.getTable(join.sourceA), source.getTable(join.sourceB), join.join_conditions);
-        //console.log( result.toText());
+        let result = this.join_intern(sourceResult, source.getTable(join.sourceA), source.getTable(join.sourceB), join.join_conditions);
+        // console.log( result.toText());
         return source.addTable(result);
     }
-    order(source, order) {
-        let result = this.order_intern(order.sourceResult, source.getTable(order.source), order.order_columns);
-        //console.log( result.toText());
+    order(source, sourceResult, data, order) {
+        console.log("Order: " + data.name + " -> " + sourceResult);
+        for (let o of order) {
+            console.log(o.name + " (" + o.col_nr + ")" + " " + o.order_mode);
+        }
+        console.log("");
+        let result = this.order_intern(sourceResult, data, order);
+        // console.log( result.toText());
+        return source.addTable(result);
+    }
+    group(source, sourceResult, data, group) {
+        console.log("Group: " + data.name + " -> " + sourceResult);
+        for (let grp of group) {
+            console.log(grp.name + " (" + grp.col_nr + ")" + " " + grp.group_mode);
+        }
+        console.log("");
+        let result = this.group_intern(sourceResult, data, group);
+        // console.log( result.toText());
         return source.addTable(result);
     }
     order_intern(name, data, orderCond) {
@@ -59,15 +76,6 @@ class RelationalTransform {
         });
         result.rows = sortedArray;
         return result;
-    }
-    group(source, group) {
-        console.log(group.name + " [" + group.type + "]");
-        console.log(group.source + " -> " + group.sourceResult);
-        for (let grp of group.group_columns) {
-            console.log(grp.name + " (" + grp.col_nr + ")" + " " + grp.group_mode);
-        }
-        console.log("");
-        return source.addTable(this.group_intern(group.sourceResult, source.getTable(group.source), group.group_columns));
     }
     project_intern(name, data, prjCond) {
         let res_columns = [];
@@ -98,10 +106,7 @@ class RelationalTransform {
         let orderCond = [];
         for (let gc of grpCond) {
             if (gc.group_mode == "key") {
-                let oc = new OrderCondition();
-                oc.col_nr = gc.col_nr;
-                oc.name = gc.name;
-                oc.order_mode = 'ASC';
+                let oc = new OrderCondition(gc.col_nr, gc.name, 'ASC');
                 orderCond.push(oc);
                 keys.push(oc.col_nr);
             }
@@ -155,7 +160,7 @@ class RelationalTransform {
         }
         //console.log( "new Row: " + sum + " " + count + " - " + newRow.row );
         groupResult.rows.push(newRow);
-        console.log(groupResult.toText());
+        // console.log( groupResult.toText());   
         result = this.project_intern(name, groupResult, grpCond);
         return result;
     }
@@ -189,17 +194,16 @@ class RelationalTransform {
         }
         return result;
     }
-    checkCondition(conditions, row_A, row_B) {
-        for (let key of conditions) {
-            if (row_A.row[key.srcA.col_nr] == row_B.row[key.srcB.col_nr]) {
-                //console.log("checking " + key.col_nr_A + "/" + key.col_nr_B + " : " + row_A.row[key.col_nr_A] + "/" + row_B.row[key.col_nr_B] + "-> true");                
-            }
-            else {
-                //console.log("checking " + key.col_nr_A + "/" + key.col_nr_B + " : " + row_A.row[key.col_nr_A] + "/" + row_B.row[key.col_nr_B] + "-> false");
-                return false;
-            }
+    checkCondition(condition, row_A, row_B) {
+        let result = condition(row_A, row_B);
+        if (result) {
+            // console.log("checking -> true");                
+            return true;
         }
-        return true;
+        else {
+            // console.log("checking -> false");
+            return false;
+        }
     }
 }
 exports.RelationalTransform = RelationalTransform;

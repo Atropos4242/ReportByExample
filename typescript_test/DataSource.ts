@@ -1,21 +1,14 @@
 import { Table, Column, Row } from './Table';
-import { JoinCondition, Join, Group, RelationalTransform } from './Transformation';
+import { Join, GroupColumn, RelationalTransform, OrderCondition } from './Transformation';
 
 export class DataSource {
     sources :  Map<string,Table>;
-    transformations : Map<string,Join|Group>;
-
     relTransformations = new RelationalTransform();
 
-    constructor(tables : TableDataStructures ) {
+    constructor(table_structures : TableDataStructure[] ) {
         this.sources = new Map<string, Table>();
-        for( let t of tables.tableDataStructures) {
+        for( let t of table_structures) {
             this.addTable(new Table(t.name, t.columns))
-        }
-
-        this.transformations = new Map<string, Join|Group>();
-        for( let t of tables.transformations) {
-            this.transformations.set(t.name, t);
         }
     }
 
@@ -28,33 +21,33 @@ export class DataSource {
         return this.sources.get(name);
     }
 
-    doAllTransformations() {
-        let result_table : string = "none";
-        for( let t of this.transformations.keys()) {
-            result_table= this.relTransformations.doTransformation(this, this.transformations.get(t));
-        }
-        return result_table;
-    }
+    doScriptedTransformnations( joins : Join[], group : GroupColumn[], order : OrderCondition[] ) : string {
+        const start = performance.now();
 
-    doScriptedTransformnations() : string {
         let result_table : string = "none";
-        return result_table;       
+        let nr : number = 1;
+        for( let j of joins ) {
+            result_table = this.relTransformations.join( this, "J" + nr, j );   
+        }
+        result_table = this.relTransformations.group( this, "G", this.getTable(result_table), group );   
+        result_table = this.relTransformations.order( this, "O", this.getTable(result_table), order );   
+
+        const end = performance.now();
+        console.log(`Execution time: ${end - start} ms`);
+
+        console.log(this.getTable(result_table).toText());
+
+        return result_table;
     }
 }
 
-export interface TableDataStructures {
-    tableDataStructures:
-    [
-        {
-            name : string,   
-            columns : [
-                {
-                    col_nr : number;
-                    name : string;
-                }
-            ]
-        }
-    ],
-    transformations: [Join|Group]
+export class TableDataStructure {
+    name : string;
+    columns : Column[];
+
+    constructor(name : string, columns : Column[])  {
+        this.name=name;
+        this.columns=columns;
+    }
 }
 

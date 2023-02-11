@@ -1,40 +1,62 @@
 import { Dataset } from './Dataset';
-import { DataSource, TableDataStructures } from './DataSource';
-
-import tableDataStructure from './TableDataStructures.json';
+import { DataSource, TableDataStructure } from './DataSource';
 import dataA from './Data_Set_A.json';
 import dataB from './Data_Set_B_large.json';
+import { GroupColumn, Join, OrderCondition } from './Transformation';
+import { Row, Column } from './Table';
 
-function runScript() {
-    const start = performance.now();
 
-    let source = new DataSource(tableDataStructure as TableDataStructures);
+let source = new DataSource(
+    [
+        new TableDataStructure("T.Modell", 
+        [
+            new Column(0, "MODELL"), 
+            new Column(1, "BEZEICHNUNG"), 
+        ]),
+        new TableDataStructure("T.Anzahl", 
+        [
+            new Column(0, "PARTNER"), 
+            new Column(1, "MODELL"), 
+            new Column(2, "ANZAHL"), 
+        ]),
+        new TableDataStructure("T.Result", 
+        [
+            new Column(0, "PARTNER"), 
+            new Column(1, "MODELL"), 
+            new Column(2, "BEZEICHUNG"), 
+            new Column(3, "ANZAHL"), 
+        ])                
+    ]
+);
 
-    source.getTable("T.Modell").setData(dataA as Dataset);
-    //console.log(source.getTable("T.Modell").toText());
+source.getTable("T.Modell").setData(dataA as Dataset);
+source.getTable("T.Anzahl").setData(dataB as Dataset);
 
-    source.getTable("T.Anzahl").setData(dataB as Dataset);
-    //console.log(source.getTable("T.Anzahl").toText());
-
-    console.log(source.getTable(source.doAllTransformations()).toText());
-
-    const end = performance.now();
-    console.log(`Execution time: ${end - start} ms`);
+class Modell_Row extends Row {
+    getModell() : any { return this.row[0]; };
+    getBezeichung() : any { return this.row[1]; };
 }
 
-function runJSVersion() {
-    const start = performance.now();
-    let source = new DataSource(tableDataStructure as TableDataStructures);
-
-    source.getTable("T.Modell").setData(dataA as Dataset);
-    source.getTable("T.Anzahl").setData(dataB as Dataset);
-
-    console.log(source.getTable(source.doScriptedTransformnations()).toText());
-
-    const end = performance.now();
-    console.log(`Execution time: ${end - start} ms`);
+class Anzahl_Row extends Row {
+    getPartner() : any { return this.row[0]; };
+    getModell() : any { return this.row[1]; };
+    getAnzahl() : any { return this.row[2]; };
 }
 
-runJSVersion();
-//console.log(eval("end - start"));
+source.doScriptedTransformnations(
+    [
+        new Join( "T.Modell", "T.Anzahl", ( row_A : Row, row_B : Row ) : boolean => 
+            { return (row_A as Modell_Row ).getModell() == (row_B as Anzahl_Row).getModell(); })
+    ],
+    [
+        new GroupColumn(0, "MODELL", "key"),
+        new GroupColumn(1, "BEZEICHNUNG", "key"),
+        new GroupColumn(4, "ANZAHL", "sum")
+    ],
+    [
+        new OrderCondition(2,"T.Anzahl:ANZAHL","DESC")
+    ]
+);
+
+
 
