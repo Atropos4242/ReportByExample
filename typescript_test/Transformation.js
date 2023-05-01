@@ -29,12 +29,12 @@ class RelationalTransform {
         }
         console.log("");
         let result = this.join_intern(join.sourceResult, source.getTable(join.sourceA), source.getTable(join.sourceB), join.join_conditions);
-        //console.log( result.toText());
+        console.log(result.toText());
         return source.addTable(result);
     }
     order(source, order) {
         let result = this.order_intern(order.sourceResult, source.getTable(order.source), order.order_columns);
-        //console.log( result.toText());
+        console.log(result.toText());
         return source.addTable(result);
     }
     order_intern(name, data, orderCond) {
@@ -192,14 +192,25 @@ class RelationalTransform {
     checkCondition(conditions, row_A, row_B) {
         for (let key of conditions) {
             if (row_A.row[key.srcA.col_nr] == row_B.row[key.srcB.col_nr]) {
-                //console.log("checking " + key.col_nr_A + "/" + key.col_nr_B + " : " + row_A.row[key.col_nr_A] + "/" + row_B.row[key.col_nr_B] + "-> true");                
+                //console.log("checking " + key.srcA.col_nr + "/" + key.srcB.col_nr + " : " + row_A.row[key.srcA.col_nr] + "/" + row_B.row[key.srcB.col_nr] + "-> true");                
             }
             else {
-                //console.log("checking " + key.col_nr_A + "/" + key.col_nr_B + " : " + row_A.row[key.col_nr_A] + "/" + row_B.row[key.col_nr_B] + "-> false");
+                //console.log("checking " + key.srcA.col_nr + "/" + key.srcB.col_nr + " : " + row_A.row[key.srcA.col_nr] + "/" + row_B.row[key.srcB.col_nr] + "-> false");
                 return false;
             }
         }
         return true;
+    }
+    checkConditionExpression(condition, row_A, row_B) {
+        let result = condition(row_A, row_B);
+        if (result) {
+            console.log("checking -> true");
+            return true;
+        }
+        else {
+            console.log("checking -> false");
+            return false;
+        }
     }
 }
 exports.RelationalTransform = RelationalTransform;

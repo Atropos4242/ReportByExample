@@ -17,6 +17,21 @@
             ]
         },
         {
+            "name": "T.FOD_UMSATZ",
+            "columns" : [
+                {"col_nr": 0, "name":"PROVISION"}, 
+                {"col_nr": 1, "name":"DUMMY"}, 
+                {"col_nr": 2, "name":"PROZENT"}, 
+                {"col_nr": 3, "name":"UMSATZ"},
+                {"col_nr": 4, "name":"DATUM"},
+                {"col_nr": 5, "name":"MODELLGRUPPE"},
+                {"col_nr": 6, "name":"DESCR"},
+                {"col_nr": 7, "name":"DAUER"},
+                {"col_nr": 8, "name":"FIN"},
+                {"col_nr": 9, "name":"MODELL_DESCR"}
+            ]
+        },
+        {
             "name": "T.Result",
             "columns" : [
                 {"col_nr": 0, "name":"PARTNER"}, 
@@ -32,14 +47,14 @@
             "name" : "Join Modell Bezeichung",
             "type" : "JOIN_FULL_TABLE_SCAN",
             "sourceA" : "T.Modell",
-            "sourceB" : "T.Anzahl",
+            "sourceB" : "T.FOD_UMSATZ",
             "sourceResult" : "T.Join",
             "join_conditions":
             [
                 {
                     "name" : "ConditionModell",
                     "srcA": {"col_name": "MODELL"}, 
-                    "srcB": {"col_name": "MODELL"},
+                    "srcB": {"col_name": "MODELLGRUPPE"},
                     "operation" : "="
                 }
             ]
@@ -53,7 +68,7 @@
             [
                 {"col_nr": 0, "name":"MODELL",      "group_mode": "key" }, 
                 {"col_nr": 1, "name":"BEZEICHNUNG", "group_mode": "key" }, 
-                {"col_nr": 4, "name":"ANZAHL",      "group_mode": "sum" }
+                {"col_nr": 4, "name":"UMSATZ",      "group_mode": "sum" }
             ]
         },
         {
@@ -63,7 +78,7 @@
             "sourceResult" : "T.Final",            
             "order_columns":
             [
-                {"col_nr": 2, "name":"T.Anzahl:ANZAHL",      "order_mode": "DESC" }
+                {"col_nr": 2, "name":"T.Anzahl:UMSATZ",      "order_mode": "DESC" }
             ]
         }         
     ]
