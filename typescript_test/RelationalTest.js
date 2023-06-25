@@ -9,7 +9,8 @@ const Data_Set_A_json_1 = __importDefault(require("./Data_Set_A.json"));
 const Data_Set_B_large_json_1 = __importDefault(require("./Data_Set_B_large.json"));
 const Fetch_1 = require("./Fetch");
 let urls = [
-    "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=SALES.F_FOD_FZG_LISTE&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV&filter=%5B%7B%22type%22%3A%22number%22%2C%22value%22%3A%222022%22%7D%5D"
+    "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=SALES.F_FOD_FZG_LISTE&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV&filter=%5B%7B%22type%22%3A%22number%22%2C%22value%22%3A%222022%22%7D%5D",
+    "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=GW.F_ABSATZ_DATA&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV"
 ];
 let source;
 function gatherLocalData() {
@@ -22,6 +23,7 @@ function gatherLocalData() {
     console.log("Created local Datasets after " + `${end - start} ms`);
 }
 function gatherRemoteData(urls, callback) {
+    console.log("gatherRemoteData");
     let start = performance.now();
     var requests = urls.map(function (url) {
         return fetch(url)
@@ -82,5 +84,5 @@ function runTransformations() {
 }
 source = new DataSource_1.DataSource(TableDataStructures_json_1.default);
 gatherLocalData();
-gatherRemoteData(urls, runTransformations);
+source.gatherAllData(runTransformations);
 //# sourceMappingURL=RelationalTest.js.map

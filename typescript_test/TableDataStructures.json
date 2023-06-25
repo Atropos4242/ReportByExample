@@ -29,7 +29,26 @@
                 {"col_nr": 7, "name":"DAUER"},
                 {"col_nr": 8, "name":"FIN"},
                 {"col_nr": 9, "name":"MODELL_DESCR"}
-            ]
+            ],
+            "url": "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=SALES.F_FOD_FZG_LISTE&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV&filter=%5B%7B%22type%22%3A%22number%22%2C%22value%22%3A%222022%22%7D%5D"
+        },
+        {
+            "name": "T.ABSATZ",
+            "columns" : [
+                {"col_nr": 0, "name":"EBENE"}, 
+                {"col_nr": 1, "name":"ORGA_ID"}, 
+                {"col_nr": 2, "name":"REGION"}, 
+                {"col_nr": 3, "name":"GEBIET"},
+                {"col_nr": 4, "name":"KETTE"},
+                {"col_nr": 5, "name":"PARTNER"},
+                {"col_nr": 6, "name":"JAHR"},
+                {"col_nr": 7, "name":"MONAT"},
+                {"col_nr": 8, "name":"MARKE"},
+                {"col_nr": 9, "name":"MODELL"},
+                {"col_nr": 10, "name":"GESCHAEFTSART"},
+                {"col_nr": 11, "name":"ABSATZ"}
+            ],
+            "url": "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=GW.F_ABSATZ_DATA&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV"
         },
         {
             "name": "T.Result",

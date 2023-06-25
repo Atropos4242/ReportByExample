@@ -17,11 +17,13 @@ export class Table {
     name : string;   
     columns : Column[];
     rows : Array<Row>;
+    url: string;
 
-    constructor( name : string, columns :  Column[] ) {
+    constructor( name : string, columns :  Column[], url: string ) {
         this.name = name;
         this.rows = new Array<Row>();
         this.columns = columns;
+        this.url = url;
     }
 
     setData( data : Dataset ) : Table

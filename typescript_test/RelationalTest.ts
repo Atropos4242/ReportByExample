@@ -7,7 +7,9 @@ import dataB from './Data_Set_B_large.json';
 import { fetchFromURL, fetchFromURLs } from './Fetch';
 
 let urls : string[] = [
-    "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=SALES.F_FOD_FZG_LISTE&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV&filter=%5B%7B%22type%22%3A%22number%22%2C%22value%22%3A%222022%22%7D%5D"];
+    "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=SALES.F_FOD_FZG_LISTE&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV&filter=%5B%7B%22type%22%3A%22number%22%2C%22value%22%3A%222022%22%7D%5D",
+    "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=GW.F_ABSATZ_DATA&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV"
+];
 
 let source : DataSource;
 
@@ -25,6 +27,7 @@ function gatherLocalData() {
 }
 
 function gatherRemoteData(urls : string[], callback : Function) : any {
+    console.log("gatherRemoteData");
     let start = performance.now();
 
     var requests = urls.map(function(url){
@@ -101,7 +104,9 @@ function runTransformations() {
     console.log(`Execution time: ${end - start} ms`);
 }
 
+
 source = new DataSource(tableDataStructure as TableDataStructures);
 gatherLocalData();
-gatherRemoteData(urls, runTransformations);
+source.gatherAllData(runTransformations);
+
 

@@ -8,10 +8,11 @@ class Row {
 }
 exports.Row = Row;
 class Table {
-    constructor(name, columns) {
+    constructor(name, columns, url) {
         this.name = name;
         this.rows = new Array();
         this.columns = columns;
+        this.url = url;
     }
     setData(data) {
         this.rows = new Array();
