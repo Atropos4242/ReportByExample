@@ -1,6 +1,7 @@
 import { fetchFromURL, fetchFromURLs } from './Fetch';
 import { Dataset } from './Dataset';
-import { DataSource, TableDataStructures } from './DataSource';
+import { DataSource } from './DataSource';
+import { TableDataStructures } from './TableDataStructures';
 
 import tableDataStructure from '../data_config/gw_absatz_tab.tds.json';
 import data_GW_ABSATZ_TAB from '../data_config/Data_Set_Tree_GW_ABSATZ_TAB.json';
@@ -19,6 +20,6 @@ function gatherLocalData() {
 
 source = new DataSource(tableDataStructure as TableDataStructures);
 console.log(source.getTable("T.GW_ABSATZ_TAB").definitionToText());
-source.gatherAllDataAndRunTransformations(gatherLocalData);
+//source.gatherAllDataAndRunTransformations(gatherLocalData);
 
-console.log(source.getTable("T.GW_ABSATZ_TAB").toText());
+//console.log(source.getTable("T.GW_ABSATZ_TAB").toText());

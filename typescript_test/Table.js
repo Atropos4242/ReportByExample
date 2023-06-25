@@ -9,12 +9,25 @@ class Row {
 }
 exports.Row = Row;
 class Table {
+    //meta_data : Array<TableMetaData>;
     constructor(name, columns, url) {
         this.name = name;
         this.rows = new Array();
         this.columns = columns;
         this.url = url;
-        this.meta_data = new Array();
+        //this.meta_data = new Array<TableMetaData>();
+    }
+    getRowMetaData(index) {
+        return this.rows[index].rowMetaData;
+    }
+    setRowMetaData(index, md) {
+        this.rows[index].rowMetaData = md;
+    }
+    getColMetaData(index) {
+        return this.columns[index].columnMetaData;
+    }
+    setColMetaData(index, md) {
+        this.columns[index].columnMetaData = md;
     }
     setData(data) {
         this.rows = new Array();
@@ -28,7 +41,7 @@ class Table {
     setDataNotPlain(data) {
         //console.log(data.length);
         this.rows = new Array();
-        this.meta_data = new Array();
+        //this.meta_data = new Array<TableMetaData>();
         for (let row of data) {
             //console.log(row);            
             let r = new Row();
@@ -37,11 +50,11 @@ class Table {
                 if (key != "__META_DATA")
                     r.row.push(row[key]);
                 else {
-                    m = new TableMetaData_1.TableMetaData(row[key]);
+                    r.rowMetaData = new TableMetaData_1.TableMetaData(row[key]);
                 }
             }
             this.rows.push(r);
-            this.meta_data.push(m);
+            //this.meta_data.push(m);
         }
         return this;
     }
@@ -58,7 +71,7 @@ class Table {
                 for (let value of row.row) {
                     text += value + '\t';
                 }
-                text += this.meta_data[inx] != undefined ? " | " + (this.meta_data[inx]).toText() : "";
+                text += this.getRowMetaData[inx] != undefined ? " | " + (this.getRowMetaData[inx]).toText() : "";
                 text += '\n';
             }
         }
@@ -80,14 +93,14 @@ class Table {
         let col_name_max_width = "                                                             ";
         text += ("Index " + col_name_max_width).substring(0, 5 + 3);
         text += ("Column " + col_name_max_width).substring(0, max_col_len + 3);
-        text += "Example";
+        text += "MetaData";
         text += "\n";
         for (let i = 0; i < this.columns.length; i++) {
             text += (i + col_name_max_width).substring(0, 5 + 3);
             text += (this.columns[i].name + col_name_max_width).substring(0, max_col_len + 3);
             if (this.rows.length > 0)
                 text += this.rows[0].row[i];
-            text += (this.columns[i].__META_DATA != undefined ? JSON.stringify(this.columns[i].__META_DATA) : "");
+            text += (this.columns[i].columnMetaData != undefined ? JSON.stringify(this.columns[i].columnMetaData) : "");
             text += "\n";
         }
         text += '\n';

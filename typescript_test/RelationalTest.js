@@ -16,6 +16,6 @@ function gatherLocalData() {
 }
 source = new DataSource_1.DataSource(gw_absatz_tab_tds_json_1.default);
 console.log(source.getTable("T.GW_ABSATZ_TAB").definitionToText());
-source.gatherAllDataAndRunTransformations(gatherLocalData);
-console.log(source.getTable("T.GW_ABSATZ_TAB").toText());
+//source.gatherAllDataAndRunTransformations(gatherLocalData);
+//console.log(source.getTable("T.GW_ABSATZ_TAB").toText());
 //# sourceMappingURL=RelationalTest.js.map

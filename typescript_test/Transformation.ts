@@ -126,13 +126,14 @@ export class RelationalTransform {
         for( let inx = 0 ; inx < source.getTable(trans.sourceA).rows.length ; inx++ )
         {
             if( 
-                    source.getTable(trans.sourceA).meta_data[inx] != undefined && 
-                    source.getTable(trans.sourceA).meta_data[inx].BLOWUP_COLUMN != undefined &&
-                    source.getTable(trans.sourceA).meta_data[inx].BLOWUP_TARGET_COLUMN != undefined
+                    source.getTable(trans.sourceA).getColMetaData[inx] != undefined && 
+                    source.getTable(trans.sourceA).getColMetaData[inx].blowup != undefined &&
+                    source.getTable(trans.sourceA).getColMetaData[inx].blowup.BLOWUP_COLUMN != undefined &&
+                    source.getTable(trans.sourceA).getColMetaData[inx].blowup.BLOWUP_TARGET_COLUMN != undefined
                 ) {
-                let col_nr_A = source.getTable(trans.sourceA).columns.find(x => x.name == source.getTable(trans.sourceA).meta_data[inx].BLOWUP_COLUMN).col_nr;
-                let col_nr_B = source.getTable(trans.sourceB).columns.find(x => x.name == source.getTable(trans.sourceA).meta_data[inx].BLOWUP_TARGET_COLUMN).col_nr;
-                source.getTable(trans.sourceA).meta_data[inx].setBlowupColumns(col_nr_A,col_nr_B);
+                let col_nr_A = source.getTable(trans.sourceA).columns.find(x => x.name == source.getTable(trans.sourceA).getColMetaData[inx].blowup.BLOWUP_COLUMN).col_nr;
+                let col_nr_B = source.getTable(trans.sourceB).columns.find(x => x.name == source.getTable(trans.sourceA).getColMetaData[inx].blowup.BLOWUP_TARGET_COLUMN).col_nr;
+                source.getTable(trans.sourceA).getColMetaData[inx].blowup.setBlowupColumns(col_nr_A,col_nr_B);
             }
         }
 
@@ -148,15 +149,19 @@ export class RelationalTransform {
         {
             let row = data_basis.rows[inx];
             //row for blowing up is marked with "BLOWUP" as content
-            if( data_basis.meta_data[inx] != undefined && data_basis.meta_data[inx].BLOWUP_basis_col != undefined && data_basis.meta_data[inx].BLOWUP_dim_col != undefined ) {
+            if( 
+                data_basis.getColMetaData[inx] != undefined && 
+                data_basis.getColMetaData[inx].blowup != undefined && 
+                data_basis.getColMetaData[inx].blowup.BLOWUP_basis_col != undefined && 
+                data_basis.getColMetaData[inx].blowup.BLOWUP_dim_col != undefined ) {
                 //console.log(data_basis.meta_data[inx].toText());
                 for( let rowdim of data_dimension.rows ) {
 
                     let new_row : Row = new Row();          
                     //copy row and replace one column         
                     for( let a = 0 ; a < row.row.length ; a++ ) {
-                        if( a == data_basis.meta_data[inx].BLOWUP_basis_col ) {
-                            new_row.row.push(rowdim.row[data_basis.meta_data[inx].BLOWUP_dim_col]);
+                        if( a == data_basis.getColMetaData[inx].blowup.BLOWUP_basis_col ) {
+                            new_row.row.push(rowdim.row[data_basis.getColMetaData[inx].blowup.BLOWUP_dim_col]);
                         }
                         else
                         {
@@ -348,7 +353,7 @@ export class RelationalTransform {
         let res_columns : Column[] = [];
         let nr : number = 0;
         for( let col of dataA.columns) {
-            let c : Column = { "col_nr": nr, "name": dataA.name + ":" + col.name };
+            let c : Column = { "col_nr": nr, "name": dataA.name + ":" + col.name};
             res_columns.push(c);
             nr++;
         }        

@@ -22,21 +22,13 @@ class DataSource {
     getTable(name) {
         return this.sources.get(name);
     }
-    doAllTransformations() {
-        let result_table = "none";
-        for (let t of this.transformations.keys()) {
-            result_table = this.relTransformations.doTransformation(this, this.transformations.get(t));
-        }
-        return result_table;
-    }
-    doScriptedTransformnations() {
-        let result_table = "none";
-        return result_table;
-    }
     runTransformations() {
         console.log("Running Transformations now...");
         const start = performance.now();
-        let resultTableName = this.doAllTransformations();
+        let resultTableName = "none";
+        for (let t of this.transformations.keys()) {
+            resultTableName = this.relTransformations.doTransformation(this, this.transformations.get(t));
+        }
         if (this.getTable(resultTableName) != undefined)
             console.log(this.getTable(resultTableName).toText());
         else

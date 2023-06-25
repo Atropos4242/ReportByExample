@@ -4,11 +4,13 @@ import { TableMetaData } from './TableMetaData';
 export interface Column {
     col_nr : number;
     name : string;
-    __META_DATA?: TableMetaData;
+    columnMetaData?: TableMetaData;
 }
 
 export class Row {
     row : Array<any>;
+    rowMetaData?: TableMetaData;
+
     constructor() {
         this.row = new Array<any>();
     }
@@ -20,14 +22,30 @@ export class Table {
     columns : Column[];
     rows : Array<Row>;
     url: string;
-    meta_data : Array<TableMetaData>;
+    //meta_data : Array<TableMetaData>;
 
     constructor( name : string, columns :  Column[], url?: string ) {
         this.name = name;
         this.rows = new Array<Row>();
         this.columns = columns;
         this.url = url;
-        this.meta_data = new Array<TableMetaData>();
+        //this.meta_data = new Array<TableMetaData>();
+    }
+
+    getRowMetaData( index: number ) : TableMetaData {
+        return this.rows[index].rowMetaData;
+    }
+
+    setRowMetaData( index: number, md: TableMetaData ) {
+        this.rows[index].rowMetaData = md;
+    }
+
+    getColMetaData( index: number ) : TableMetaData {
+        return this.columns[index].columnMetaData;
+    }
+
+    setColMetaData( index: number, md: TableMetaData ) {
+        this.columns[index].columnMetaData = md;
     }
 
     setData( data : Dataset ) : Table
@@ -45,7 +63,7 @@ export class Table {
     {        
         //console.log(data.length);
         this.rows = new Array<Row>();
-        this.meta_data = new Array<TableMetaData>();
+        //this.meta_data = new Array<TableMetaData>();
         for( let row of data) {            
             //console.log(row);            
             let r : Row = new Row();
@@ -55,11 +73,11 @@ export class Table {
                     r.row.push(row[key]);
                 else
                 {
-                    m = new TableMetaData(row[key]);
+                    r.rowMetaData = new TableMetaData(row[key]);
                 }
             }  
             this.rows.push(r);
-            this.meta_data.push(m);
+            //this.meta_data.push(m);
         }
         return this;
     }
@@ -77,7 +95,7 @@ export class Table {
                 for( let value of row.row ) {
                     text += value + '\t';
                 }
-                text += this.meta_data[inx] != undefined ? " | " + (this.meta_data[inx]).toText() : "";
+                text += this.getRowMetaData[inx] != undefined ? " | " + (this.getRowMetaData[inx]).toText() : "";
                 text += '\n'
             }
         } else {
@@ -101,13 +119,13 @@ export class Table {
         
         text += ("Index "+ col_name_max_width).substring(0,5+3)
         text += ("Column "+ col_name_max_width).substring(0,max_col_len+3)
-        text += "Example"
+        text += "MetaData"
         text += "\n"
         for( let i = 0 ; i < this.columns.length ; i++ ) {
             text += (i + col_name_max_width).substring(0,5+3);
             text += (this.columns[i].name + col_name_max_width).substring(0,max_col_len+3);
             if( this.rows.length > 0 ) text += this.rows[0].row[i];
-            text += (this.columns[i].__META_DATA != undefined ? JSON.stringify(this.columns[i].__META_DATA) : "")
+            text += (this.columns[i].columnMetaData != undefined ? JSON.stringify(this.columns[i].columnMetaData) : "")
             text += "\n";
         }
         text += '\n';
