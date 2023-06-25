@@ -51,6 +51,14 @@
             "url": "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=GW.F_ABSATZ_DATA&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV"
         },
         {
+            "name": "T.GW_ABSATZ_TAB",
+            "columns" : [
+                {"col_nr": 0, "name":"SORT"}, 
+                {"col_nr": 1, "name":"TREE_1"}, 
+                {"col_nr": 2, "name":"TREE_2"}
+            ]
+         },
+        {
             "name": "T.Result",
             "columns" : [
                 {"col_nr": 0, "name":"PARTNER"}, 

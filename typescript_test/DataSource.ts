@@ -1,9 +1,11 @@
 import { Table, Column, Row } from './Table';
-import { JoinCondition, Join, Group, RelationalTransform } from './Transformation';
+import { JoinCondition, Join, Group, RelationalTransform, Blowup } from './Transformation';
+import { TransformationType } from './Transformation';
+import { TableMetaData } from './TableMetaData';
 
 export class DataSource {
     sources :  Map<string,Table>;
-    transformations : Map<string,Join|Group>;
+    transformations : Map<string,TransformationType>;
 
     relTransformations = new RelationalTransform();
 
@@ -13,7 +15,7 @@ export class DataSource {
             this.addTable(new Table(t.name, t.columns, t.url))
         }
 
-        this.transformations = new Map<string, Join|Group>();
+        this.transformations = new Map<string, TransformationType>();
         for( let t of tables.transformations) {
             this.transformations.set(t.name, t);
         }
@@ -42,11 +44,16 @@ export class DataSource {
     }
 
     runTransformations() {
-        console.log("Running Transformstions now...");
+        console.log("Running Transformations now...");
         const start = performance.now();
     
-        console.log(this.getTable(this.doAllTransformations()).toText());
-    
+        let resultTableName = this.doAllTransformations();
+
+        if( this.getTable(resultTableName) != undefined )
+            console.log(this.getTable(resultTableName).toText());
+        else
+            console.log("No result table returned");
+
         const end = performance.now();
         console.log(`Execution time: ${end - start} ms`);
     }
@@ -106,11 +113,12 @@ export interface TableDataStructures {
                 {
                     col_nr : number;
                     name : string;
+                    __META_DATA: TableMetaData;
                 }
             ],
             url? : string
         }
     ],
-    transformations: [Join|Group]
+    transformations: [TransformationType]
 }
 

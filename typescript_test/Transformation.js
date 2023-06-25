@@ -16,6 +16,71 @@ class RelationalTransform {
         if (trans.type == "ORDER") {
             return this.order(source, trans);
         }
+        if (trans.type == "BLOWUP") {
+            return this.blowup(source, trans);
+        }
+        if (trans.type == "TREECON") {
+            return this.treeCon(source, trans);
+        }
+        throw new Error("Unknown transformation found " + trans.name + " " + trans.type);
+    }
+    transformationError(condition, trans, errText) {
+        if (condition)
+            throw new Error("Error in transformation " + trans.type + " [" + trans.name + "]" + ": " + errText);
+    }
+    treeCon(source, trans) {
+        console.log("TreeCon-Transformation");
+        this.transformationError(trans.sourceResult == undefined, trans, "sourceResult is empty");
+        this.transformationError(source.getTable(trans.sourceA) == undefined, trans, "Table " + trans.sourceA + " not found");
+        this.transformationError(source.getTable(trans.sourceB) == undefined, trans, "Table " + trans.sourceB + " not found");
+        return trans.sourceA;
+    }
+    blowup(source, trans) {
+        console.log("Blowup-Transformation");
+        this.transformationError(trans.sourceResult == undefined, trans, "sourceResult is empty");
+        this.transformationError(source.getTable(trans.sourceA) == undefined, trans, "Table " + trans.sourceA + " not found");
+        this.transformationError(source.getTable(trans.sourceB) == undefined, trans, "Table " + trans.sourceB + " not found");
+        this.transformationError(source.getTable(trans.sourceA).columns.find(x => x.name == trans.blowup_srcA_col_name) == undefined, trans, "Column " + trans.blowup_srcA_col_name + " not found in table " + trans.sourceA);
+        this.transformationError(source.getTable(trans.sourceB).columns.find(x => x.name == trans.blowup_srcB_col_name) == undefined, trans, "Column " + trans.blowup_srcB_col_name + " not found in table " + trans.sourceB);
+        for (let inx = 0; inx < source.getTable(trans.sourceA).rows.length; inx++) {
+            if (source.getTable(trans.sourceA).meta_data[inx] != undefined &&
+                source.getTable(trans.sourceA).meta_data[inx].BLOWUP_COLUMN != undefined &&
+                source.getTable(trans.sourceA).meta_data[inx].BLOWUP_TARGET_COLUMN != undefined) {
+                let col_nr_A = source.getTable(trans.sourceA).columns.find(x => x.name == source.getTable(trans.sourceA).meta_data[inx].BLOWUP_COLUMN).col_nr;
+                let col_nr_B = source.getTable(trans.sourceB).columns.find(x => x.name == source.getTable(trans.sourceA).meta_data[inx].BLOWUP_TARGET_COLUMN).col_nr;
+                source.getTable(trans.sourceA).meta_data[inx].setBlowupColumns(col_nr_A, col_nr_B);
+            }
+        }
+        return source.addTable(this.blowup_intern(source.getTable(trans.sourceA), source.getTable(trans.sourceB), trans.sourceResult));
+    }
+    blowup_intern(data_basis, data_dimension, result_table_name) {
+        console.log("Blowup-Transformation intern");
+        let result = new Table_1.Table(result_table_name, data_basis.columns);
+        for (let inx = 0; inx < data_basis.rows.length; inx++) {
+            let row = data_basis.rows[inx];
+            //row for blowing up is marked with "BLOWUP" as content
+            if (data_basis.meta_data[inx] != undefined && data_basis.meta_data[inx].BLOWUP_basis_col != undefined && data_basis.meta_data[inx].BLOWUP_dim_col != undefined) {
+                //console.log(data_basis.meta_data[inx].toText());
+                for (let rowdim of data_dimension.rows) {
+                    let new_row = new Table_1.Row();
+                    //copy row and replace one column         
+                    for (let a = 0; a < row.row.length; a++) {
+                        if (a == data_basis.meta_data[inx].BLOWUP_basis_col) {
+                            new_row.row.push(rowdim.row[data_basis.meta_data[inx].BLOWUP_dim_col]);
+                        }
+                        else {
+                            new_row.row.push(row.row[a]);
+                        }
+                    }
+                    result.rows.push(new_row);
+                }
+            }
+            //plain copy any other row
+            else {
+                result.rows.push(row);
+            }
+        }
+        return result;
     }
     join(source, join) {
         for (let cond of join.join_conditions) {

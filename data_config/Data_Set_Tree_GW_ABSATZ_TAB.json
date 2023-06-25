@@ -1,0 +1,13 @@
+[
+    { "sort": "1", "TREE_1": "Gesamt", "TREE_2": "Gesamt", "TREE_3": "ALLE"},
+    { "sort": "2", "TREE_1": "Gesamt", "TREE_2": "Audi", "TREE_3": "ALLE"},
+    { "sort": "3", "TREE_1": "Gesamt", "TREE_2": "Audi", "TREE_3": "BLOWUP", "__META_DATA": { "BLOWUP_COLUMN": "TREE_3", "BLOWUP_TARGET_COLUMN": "MODELL" }},
+    { "sort": "4", "TREE_1": "Gesamt", "TREE_2": "davon Audi jGW", "TREE_3": "ALLE"},
+    { "sort": "5", "TREE_1": "Gesamt", "TREE_2": "Andere Marken", "TREE_3": "ALLE"},
+    { "sort": "6", "TREE_1": "B2B", "TREE_2": "B2B", "TREE_3": "ALLE"},
+    { "sort": "7", "TREE_1": "B2B", "TREE_2": "Audi", "TREE_3": "ALLE"},
+    { "sort": "8", "TREE_1": "B2B", "TREE_2": "Andere Marken", "TREE_3": "ALLE"},
+    { "sort": "9", "TREE_1": "B2B in %", "TREE_2": "B2B in %", "TREE_3": "ALLE"},
+    { "sort": "10", "TREE_1": "B2B in %", "TREE_2": "Audi", "TREE_3": "ALLE"},
+    { "sort": "11", "TREE_1": "B2B in %", "TREE_2": "Andere Marken", "TREE_3": "ALLE"}
+]

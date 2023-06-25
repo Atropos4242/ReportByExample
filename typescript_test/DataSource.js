@@ -34,9 +34,13 @@ class DataSource {
         return result_table;
     }
     runTransformations() {
-        console.log("Running Transformstions now...");
+        console.log("Running Transformations now...");
         const start = performance.now();
-        console.log(this.getTable(this.doAllTransformations()).toText());
+        let resultTableName = this.doAllTransformations();
+        if (this.getTable(resultTableName) != undefined)
+            console.log(this.getTable(resultTableName).toText());
+        else
+            console.log("No result table returned");
         const end = performance.now();
         console.log(`Execution time: ${end - start} ms`);
     }

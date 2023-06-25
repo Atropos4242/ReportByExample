@@ -4,19 +4,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DataSource_1 = require("./DataSource");
-const TableDataStructures_json_1 = __importDefault(require("./TableDataStructures.json"));
-const Data_Set_A_json_1 = __importDefault(require("./Data_Set_A.json"));
-const Data_Set_B_large_json_1 = __importDefault(require("./Data_Set_B_large.json"));
+const gw_absatz_tab_tds_json_1 = __importDefault(require("../data_config/gw_absatz_tab.tds.json"));
+const Data_Set_Tree_GW_ABSATZ_TAB_json_1 = __importDefault(require("../data_config/Data_Set_Tree_GW_ABSATZ_TAB.json"));
 let source;
 function gatherLocalData() {
     const start = performance.now();
-    source.getTable("T.Modell").setData(Data_Set_A_json_1.default);
-    //console.log(source.getTable("T.Modell").toText());
-    source.getTable("T.Anzahl").setData(Data_Set_B_large_json_1.default);
-    //console.log(source.getTable("T.Anzahl").toText());
+    source.getTable("T.GW_ABSATZ_TAB").setDataNotPlain(Data_Set_Tree_GW_ABSATZ_TAB_json_1.default);
+    //console.log(source.getTable("TT.GW_ABSATZ_TAB").toText());
     const end = performance.now();
     console.log("Created local Datasets after " + `${end - start} ms`);
 }
-source = new DataSource_1.DataSource(TableDataStructures_json_1.default);
+source = new DataSource_1.DataSource(gw_absatz_tab_tds_json_1.default);
+console.log(source.getTable("T.GW_ABSATZ_TAB").definitionToText());
 source.gatherAllDataAndRunTransformations(gatherLocalData);
+console.log(source.getTable("T.GW_ABSATZ_TAB").toText());
 //# sourceMappingURL=RelationalTest.js.map
