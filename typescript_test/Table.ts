@@ -19,7 +19,7 @@ export class Table {
     rows : Array<Row>;
     url: string;
 
-    constructor( name : string, columns :  Column[], url: string ) {
+    constructor( name : string, columns :  Column[], url?: string ) {
         this.name = name;
         this.rows = new Array<Row>();
         this.columns = columns;

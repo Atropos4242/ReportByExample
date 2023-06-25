@@ -33,11 +33,19 @@ class DataSource {
         let result_table = "none";
         return result_table;
     }
-    gatherAllData(callback) {
+    runTransformations() {
+        console.log("Running Transformstions now...");
+        const start = performance.now();
+        console.log(this.getTable(this.doAllTransformations()).toText());
+        const end = performance.now();
+        console.log(`Execution time: ${end - start} ms`);
+    }
+    gatherAllDataAndRunTransformations(localDataCallback) {
         let start = performance.now();
+        localDataCallback();
         let remoteSources = Array.from(this.sources.keys()).filter(key => this.sources.get(key).url != undefined);
         var requests = remoteSources.map((key) => {
-            console.log(`Fetching ${key}...`);
+            //console.log(`Fetching ${key}...`);
             let fetchPromise = fetch(this.sources.get(key).url);
             return fetchPromise.then(response => {
                 return response.json();
@@ -54,7 +62,7 @@ class DataSource {
             for (let i = 0; i < results.length; i++) {
                 //console.log(results[i]);
                 if (results[i].status == undefined) {
-                    console.log("Result " + i + ": " + remoteSources[i] + " with length " + results[i].length);
+                    //console.log("Result " + i + ": " + remoteSources[i] + " with length " + results[i].length);
                     this.getTable(remoteSources[i]).setDataNotPlain(results[i]);
                 }
                 else {
@@ -62,9 +70,10 @@ class DataSource {
                     console.log(results[i]);
                 }
             }
-            callback();
+            Array.from(this.sources.keys()).forEach((key) => { console.log("Source " + key + ": " + (this.getTable(key).url == undefined ? "local" : "remote") + " length " + this.getTable(key).rows.length); });
+            this.runTransformations();
         }).catch(err => {
-            console.log(`Error while fetching {key}`);
+            console.log(`Error while fetching`);
             console.log(err);
         });
     }
