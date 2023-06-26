@@ -1,0 +1,52 @@
+{
+    "tableDataStructures":
+    [
+        {
+            "name": "T.GW_MODELL",
+            "columns" : [
+                {"col_nr": 0, "name":"MODELL"}
+            ],
+            "url": "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=GW.F_MODELL_DATA&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV"
+        },       
+        {
+            "name": "T.ABSATZ",
+            "columns" : [
+                {"col_nr": 0, "name":"EBENE"}, 
+                {"col_nr": 1, "name":"ORGA_ID"}, 
+                {"col_nr": 2, "name":"REGION"}, 
+                {"col_nr": 3, "name":"GEBIET"},
+                {"col_nr": 4, "name":"KETTE"},
+                {"col_nr": 5, "name":"PARTNER"},
+                {"col_nr": 6, "name":"JAHR"},
+                {"col_nr": 7, "name":"MONAT"},
+                {"col_nr": 8, "name":"MARKE"},
+                {"col_nr": 9, "name":"MODELL"},
+                {"col_nr": 10, "name":"GESCHAEFTSART"},
+                {"col_nr": 11, "name":"ABSATZ"}
+            ],
+            "url": "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=GW.F_ABSATZ_DATA&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV"
+        },
+        {
+            "name": "T.GW_ABSATZ_TAB",
+            "columns" : [
+                {"col_nr": 0, "name":"SORT"}, 
+                {"col_nr": 1, "name":"TREE_1"}, 
+                {"col_nr": 2, "name":"TREE_2"},
+                {"col_nr": 3, "name":"TREE_3"},
+                {"col_nr": 4, "name":"GESAMT"},
+                {"col_nr": 5, "name":"M1","columnMetaData": { "TREECON": { "AGG_COL": "ANZAHL", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "1" }]}}},
+                {"col_nr": 6, "name":"M2"},
+                {"col_nr": 7, "name":"M3"},
+                {"col_nr": 8, "name":"M4"},
+                {"col_nr": 9, "name":"M5"},
+                {"col_nr": 10, "name":"M6"},
+                {"col_nr": 11, "name":"M7"},
+                {"col_nr": 12, "name":"M8"},
+                {"col_nr": 13, "name":"M9"},
+                {"col_nr": 14, "name":"M10"},
+                {"col_nr": 15, "name":"M11"},
+                {"col_nr": 16, "name":"M12"}
+            ]
+         }
+    ]
+}
