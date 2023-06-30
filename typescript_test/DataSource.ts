@@ -1,16 +1,15 @@
-import { Table, Column, Row } from './Table';
-import { JoinCondition, Join, Group, RelationalTransform, Blowup } from './Transformation';
-import { TransformationType } from './Transformation';
-import { TableMetaData } from './TableMetaData';
-import { TableDataStructures } from './TableDataStructures';
+import { Table, Row } from './Table';
+//import { TransformationType } from './Transformation';
+import { TableDataStructureType, ColumnType, TransformationType } from './TableDataStructures';
+import { doTransformation } from './Transformation';
 
 export class DataSource {
     sources :  Map<string,Table>;
     transformations : Map<string,TransformationType>;
 
-    relTransformations = new RelationalTransform();
+    //relTransformations = new TransformationType();
 
-    constructor(tables : TableDataStructures ) {
+    constructor(tables : TableDataStructureType ) {
         this.sources = new Map<string, Table>();
         for( let t of tables.tableDataStructures) {
             this.addTable(new Table(t.name, t.columns, t.url))
@@ -37,19 +36,14 @@ export class DataSource {
 
         let resultTableName : string = "none";
         for( let t of this.transformations.keys()) {
-            resultTableName= this.relTransformations.doTransformation(this, this.transformations.get(t));
+            resultTableName= doTransformation(this, this.transformations.get(t));
         }
-
-        if( this.getTable(resultTableName) != undefined )
-            console.log(this.getTable(resultTableName).toText());
-        else
-            console.log("No result table returned");
 
         const end = performance.now();
         console.log(`Execution time: ${end - start} ms`);
     }
 
-    gatherAllDataAndRunTransformations(localDataCallback) {
+    gatherAllDataAndRunTransformations(localDataCallback, beforeTransformationsCallback, afterTransformationsCallback ) {
         let start = performance.now();
 
         localDataCallback();
@@ -87,9 +81,12 @@ export class DataSource {
                 }
             }
             Array.from(this.sources.keys()).forEach((key: string) => { console.log("Source " + key + ": " + (this.getTable(key).url == undefined ? "local" : "remote") + " length " + this.getTable(key).rows.length); })
+
+            beforeTransformationsCallback();
             this.runTransformations();
+            afterTransformationsCallback();
         }).catch(err => {
-            console.log(`Error while fetching`);
+            console.log(`Error in gatherAllDataAndRunTransformations`);
             console.log(err);
         });
     }

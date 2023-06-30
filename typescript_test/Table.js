@@ -1,7 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Table = exports.Row = void 0;
-const TableMetaData_1 = require("./TableMetaData");
+// export interface Column {
+//     col_nr : number;
+//     name : string;
+//     columnMetaData?: TableMetaData;
+// }
 class Row {
     constructor() {
         this.row = new Array();
@@ -9,13 +13,12 @@ class Row {
 }
 exports.Row = Row;
 class Table {
-    //meta_data : Array<TableMetaData>;
     constructor(name, columns, url) {
         this.name = name;
         this.rows = new Array();
         this.columns = columns;
         this.url = url;
-        //this.meta_data = new Array<TableMetaData>();
+        this.colNameNumber = new Map;
     }
     getRowMetaData(index) {
         return this.rows[index].rowMetaData;
@@ -28,6 +31,22 @@ class Table {
     }
     setColMetaData(index, md) {
         this.columns[index].columnMetaData = md;
+    }
+    getColNumberByName(name) {
+        if (this.colNameNumber.get(name) != undefined)
+            return this.colNameNumber.get(name);
+        //console.log( "No cache hit: " + name + " in " + this.name);
+        if (name == undefined)
+            throw Error("Colummn " + name + " not found in " + this.name);
+        for (let i = 0; i < this.columns.length; i++) {
+            if (this.columns[i].name.toLocaleLowerCase() == name.toLowerCase()) {
+                this.colNameNumber.set(name, i);
+                return i;
+            }
+        }
+        this.colNameNumber.set(name, -1);
+        throw Error("Colummn " + name + " not found in " + this.name);
+        return -1;
     }
     setData(data) {
         this.rows = new Array();
@@ -45,20 +64,17 @@ class Table {
         for (let row of data) {
             //console.log(row);            
             let r = new Row();
-            let m;
             for (const key of Object.keys(row)) {
                 if (key != "__META_DATA")
-                    r.row.push(row[key]);
-                else {
-                    r.rowMetaData = new TableMetaData_1.TableMetaData(row[key]);
-                }
+                    r.row[this.getColNumberByName(key)] = row[key];
+                else
+                    r.rowMetaData = row[key];
             }
             this.rows.push(r);
-            //this.meta_data.push(m);
         }
         return this;
     }
-    toText() {
+    toText(excludeMetaData) {
         let text;
         text = this.name + ':\n';
         for (let col of this.columns) {
@@ -71,7 +87,8 @@ class Table {
                 for (let value of row.row) {
                     text += value + '\t';
                 }
-                text += this.getRowMetaData[inx] != undefined ? " | " + (this.getRowMetaData[inx]).toText() : "";
+                if (!excludeMetaData)
+                    text += row.rowMetaData != undefined ? " | " + JSON.stringify(row.rowMetaData) : "";
                 text += '\n';
             }
         }

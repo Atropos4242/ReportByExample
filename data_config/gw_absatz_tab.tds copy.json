@@ -48,5 +48,24 @@
                 {"col_nr": 16, "name":"M12"}
             ]
          }
+    ],
+    "transformations":
+    [
+        {
+            "name" : "Aufblasen Modelle",
+            "type" : "BLOWUP",
+            "sourceA" : "T.GW_ABSATZ_TAB",
+            "sourceB" : "T.GW_MODELL",
+            "sourceResult" : "T.GW_ABSATZ_TAB_2",
+            "blowup_srcA_col_name": "TREE_3", 
+            "blowup_srcB_col_name": "MODELL"
+        },
+        {
+            "name" : "Tree Connect",
+            "type" : "TREECON",
+            "sourceA" : "T.GW_ABSATZ_TAB_2",
+            "sourceB" : "T.ABSATZ",
+            "sourceResult" : "T.GW_ABSATZ_TAB_3"
+        }
     ]
 }

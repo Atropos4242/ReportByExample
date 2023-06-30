@@ -4,8 +4,8 @@ exports.DataSource = void 0;
 const Table_1 = require("./Table");
 const Transformation_1 = require("./Transformation");
 class DataSource {
+    //relTransformations = new TransformationType();
     constructor(tables) {
-        this.relTransformations = new Transformation_1.RelationalTransform();
         this.sources = new Map();
         for (let t of tables.tableDataStructures) {
             this.addTable(new Table_1.Table(t.name, t.columns, t.url));
@@ -27,16 +27,12 @@ class DataSource {
         const start = performance.now();
         let resultTableName = "none";
         for (let t of this.transformations.keys()) {
-            resultTableName = this.relTransformations.doTransformation(this, this.transformations.get(t));
+            resultTableName = (0, Transformation_1.doTransformation)(this, this.transformations.get(t));
         }
-        if (this.getTable(resultTableName) != undefined)
-            console.log(this.getTable(resultTableName).toText());
-        else
-            console.log("No result table returned");
         const end = performance.now();
         console.log(`Execution time: ${end - start} ms`);
     }
-    gatherAllDataAndRunTransformations(localDataCallback) {
+    gatherAllDataAndRunTransformations(localDataCallback, beforeTransformationsCallback, afterTransformationsCallback) {
         let start = performance.now();
         localDataCallback();
         let remoteSources = Array.from(this.sources.keys()).filter(key => this.sources.get(key).url != undefined);
@@ -67,9 +63,11 @@ class DataSource {
                 }
             }
             Array.from(this.sources.keys()).forEach((key) => { console.log("Source " + key + ": " + (this.getTable(key).url == undefined ? "local" : "remote") + " length " + this.getTable(key).rows.length); });
+            beforeTransformationsCallback();
             this.runTransformations();
+            afterTransformationsCallback();
         }).catch(err => {
-            console.log(`Error while fetching`);
+            console.log(`Error in gatherAllDataAndRunTransformations`);
             console.log(err);
         });
     }
