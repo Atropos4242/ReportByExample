@@ -52,6 +52,20 @@
     "transformations":
     [
         {
+            "name" : "Group by Monat, Modell, Geschaeftsart",
+            "type" : "GROUP",
+            "source" : "T.ABSATZ",
+            "sourceResult" : "T.ABSATZ_GROUP_MON_MOD_GES",            
+            "group_columns":
+            [
+                {"name":"MODELL", "group_mode": "key" }, 
+                {"name":"MONAT", "group_mode": "key" }, 
+                {"name":"MARKE", "group_mode": "key" }, 
+                {"name":"GESCHAEFTSART", "group_mode": "key" }, 
+                {"name":"ABSATZ", "group_mode": "sum" }
+            ]
+        },
+        {
             "name" : "Aufblasen Modelle",
             "type" : "BLOWUP",
             "sourceA" : "T.GW_ABSATZ_TAB",
@@ -64,7 +78,7 @@
             "name" : "TC_ABSATZ",
             "type" : "TREECON",
             "sourceA" : "T.GW_ABSATZ_TAB_2",
-            "sourceB" : "T.ABSATZ",
+            "sourceB" : "T.ABSATZ_GROUP_MON_MOD_GES",
             "sourceResult" : "T.GW_ABSATZ_TAB_3"
         }
     ]

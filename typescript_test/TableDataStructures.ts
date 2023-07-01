@@ -54,7 +54,6 @@ const ProjectConditionForm = z.object({
 })
 
 const GroupConditionForm = z.object({
-    col_nr: z.number(),
     name: z.string(),    
     group_mode: z.string()
 })
@@ -86,11 +85,7 @@ const TransformationGroupForm = z.object({
     type: z.literal('GROUP'),
     source: z.string(),
     sourceResult: z.string(),      
-    group_columns: z.array( z.object({
-        col_nr: z.number(), 
-        name: z.string(),
-        group_mode: z.string() 
-    }))
+    group_columns: z.array( GroupConditionForm)
 })
 
 const TransformationOrderForm =  z.object({

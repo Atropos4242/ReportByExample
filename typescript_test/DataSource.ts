@@ -30,20 +30,21 @@ export class DataSource {
         return this.sources.get(name);
     }
 
-    runTransformations() {
+    runTransformations(afterEveryTransCalLback) {
         console.log("Running Transformations now...");
         const start = performance.now();
 
         let resultTableName : string = "none";
         for( let t of this.transformations.keys()) {
             resultTableName= doTransformation(this, this.transformations.get(t));
+            afterEveryTransCalLback(resultTableName);
         }
 
         const end = performance.now();
         console.log(`Execution time: ${end - start} ms`);
     }
 
-    gatherAllDataAndRunTransformations(localDataCallback, beforeTransformationsCallback, afterTransformationsCallback ) {
+    gatherAllDataAndRunTransformations(localDataCallback, beforeTransformationsCallback, afterTransformationsCallback, afterEveryTransCalLback ) {
         let start = performance.now();
 
         localDataCallback();
@@ -83,7 +84,7 @@ export class DataSource {
             Array.from(this.sources.keys()).forEach((key: string) => { console.log("Source " + key + ": " + (this.getTable(key).url == undefined ? "local" : "remote") + " length " + this.getTable(key).rows.length); })
 
             beforeTransformationsCallback();
-            this.runTransformations();
+            this.runTransformations(afterEveryTransCalLback);
             afterTransformationsCallback();
         }).catch(err => {
             console.log(`Error in gatherAllDataAndRunTransformations`);

@@ -49,7 +49,6 @@ const ProjectConditionForm = zod_1.z.object({
     name: zod_1.z.string()
 });
 const GroupConditionForm = zod_1.z.object({
-    col_nr: zod_1.z.number(),
     name: zod_1.z.string(),
     group_mode: zod_1.z.string()
 });
@@ -77,11 +76,7 @@ const TransformationGroupForm = zod_1.z.object({
     type: zod_1.z.literal('GROUP'),
     source: zod_1.z.string(),
     sourceResult: zod_1.z.string(),
-    group_columns: zod_1.z.array(zod_1.z.object({
-        col_nr: zod_1.z.number(),
-        name: zod_1.z.string(),
-        group_mode: zod_1.z.string()
-    }))
+    group_columns: zod_1.z.array(GroupConditionForm)
 });
 const TransformationOrderForm = zod_1.z.object({
     name: zod_1.z.string(),

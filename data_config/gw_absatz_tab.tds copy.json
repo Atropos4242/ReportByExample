@@ -34,7 +34,7 @@
                 {"col_nr": 2, "name":"TREE_2"},
                 {"col_nr": 3, "name":"TREE_3"},
                 {"col_nr": 4, "name":"GESAMT"},
-                {"col_nr": 5, "name":"M1","columnMetaData": { "TREECON": { "AGG_COL": "ANZAHL", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "1" }]}}},
+                {"col_nr": 5, "name":"M1","columnMetaData": { "TREECON": { "TRANS_NAME": "test", "AGG_COL": "ANZAHL", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "1" }]}}},
                 {"col_nr": 6, "name":"M2"},
                 {"col_nr": 7, "name":"M3"},
                 {"col_nr": 8, "name":"M4"},
@@ -52,20 +52,18 @@
     "transformations":
     [
         {
-            "name" : "Aufblasen Modelle",
-            "type" : "BLOWUP",
-            "sourceA" : "T.GW_ABSATZ_TAB",
-            "sourceB" : "T.GW_MODELL",
-            "sourceResult" : "T.GW_ABSATZ_TAB_2",
-            "blowup_srcA_col_name": "TREE_3", 
-            "blowup_srcB_col_name": "MODELL"
-        },
-        {
-            "name" : "Tree Connect",
-            "type" : "TREECON",
-            "sourceA" : "T.GW_ABSATZ_TAB_2",
-            "sourceB" : "T.ABSATZ",
-            "sourceResult" : "T.GW_ABSATZ_TAB_3"
+            "name" : "Group by Monat, Modell, Geschaeftsart",
+            "type" : "GROUP",
+            "source" : "T.ABSATZ",
+            "sourceResult" : "T.ABSATZ_GROUP_MON_MOD_GES",            
+            "group_columns":
+            [
+                {"name":"MODELL", "group_mode": "key" }, 
+                {"name":"MONAT", "group_mode": "key" }, 
+                {"name":"MARKE", "group_mode": "key" }, 
+                {"name":"GESCHAEFTSART", "group_mode": "key" }, 
+                {"name":"ABSATZ", "group_mode": "sum" }
+            ]
         }
     ]
 }

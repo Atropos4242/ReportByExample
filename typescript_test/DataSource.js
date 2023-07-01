@@ -22,17 +22,18 @@ class DataSource {
     getTable(name) {
         return this.sources.get(name);
     }
-    runTransformations() {
+    runTransformations(afterEveryTransCalLback) {
         console.log("Running Transformations now...");
         const start = performance.now();
         let resultTableName = "none";
         for (let t of this.transformations.keys()) {
             resultTableName = (0, Transformation_1.doTransformation)(this, this.transformations.get(t));
+            afterEveryTransCalLback(resultTableName);
         }
         const end = performance.now();
         console.log(`Execution time: ${end - start} ms`);
     }
-    gatherAllDataAndRunTransformations(localDataCallback, beforeTransformationsCallback, afterTransformationsCallback) {
+    gatherAllDataAndRunTransformations(localDataCallback, beforeTransformationsCallback, afterTransformationsCallback, afterEveryTransCalLback) {
         let start = performance.now();
         localDataCallback();
         let remoteSources = Array.from(this.sources.keys()).filter(key => this.sources.get(key).url != undefined);
@@ -64,7 +65,7 @@ class DataSource {
             }
             Array.from(this.sources.keys()).forEach((key) => { console.log("Source " + key + ": " + (this.getTable(key).url == undefined ? "local" : "remote") + " length " + this.getTable(key).rows.length); });
             beforeTransformationsCallback();
-            this.runTransformations();
+            this.runTransformations(afterEveryTransCalLback);
             afterTransformationsCallback();
         }).catch(err => {
             console.log(`Error in gatherAllDataAndRunTransformations`);

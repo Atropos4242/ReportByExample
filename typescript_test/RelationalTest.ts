@@ -10,15 +10,15 @@ function gatherLocalData() {
     const start = performance.now();
 
     source.getTable("T.GW_ABSATZ_TAB").setDataNotPlain(data_GW_ABSATZ_TAB);
-    console.log(source.getTable("T.GW_ABSATZ_TAB").definitionToText());
-    console.log(source.getTable("T.GW_ABSATZ_TAB").toText(false));
+    //console.log(source.getTable("T.GW_ABSATZ_TAB").definitionToText());
+    //console.log(source.getTable("T.GW_ABSATZ_TAB").toText(false));
 
     const end = performance.now();
     console.log("Created local Datasets after " + `${end - start} ms`);
 }
 
 function beforeTrans() {
-    console.log(source.getTable("T.ABSATZ").toText(false));
+    //console.log(source.getTable("T.ABSATZ").toText(false));
 }
 
 function afterTrans() {
@@ -28,7 +28,13 @@ function afterTrans() {
         console.log("No result table [T.GW_ABSATZ_TAB_3] returned");
 }
 
+function afterEveryTrans(tablename: string) {
+    //if( source.getTable(tablename) != undefined )
+    //    console.log(source.getTable(tablename).toText(true));
+    //else
+    //    console.log("No result table [" + tablename + "] returned");
+}
 validateTableDataStructureForm(tableDataStructure);
 
 source = new DataSource(tableDataStructure as TableDataStructureType);
-source.gatherAllDataAndRunTransformations(gatherLocalData, beforeTrans, afterTrans);
+source.gatherAllDataAndRunTransformations(gatherLocalData, beforeTrans, afterTrans,afterEveryTrans);

@@ -77,7 +77,7 @@ function treeConSumIf( data: Table, col_name: string, filterCol: TableMetaDataTr
 }
 
 function treeCon_intern(data_basis: Table, data_dimension: Table, result_table_name: string, transName: string): Table {
-    console.log("TreeCon-Transformation intern");
+    //console.log("TreeCon-Transformation intern");
 
     let result = new Table(result_table_name, data_basis.columns);
 
@@ -137,7 +137,7 @@ export function blowup(source: DataSource, trans: TransformationBlowupType): str
 }
 
 function blowup_intern(data_basis: Table, data_dimension: Table, result_table_name: string): Table {
-    console.log("Blowup-Transformation intern");
+    //console.log("Blowup-Transformation intern");
 
     let result = new Table(result_table_name, data_basis.columns);
 
@@ -230,12 +230,12 @@ export function order_intern(name: string, data: Table, orderCond: OrderConditio
 }
 
 export function group(source: DataSource, group: TransformationGroupType): string {
-    console.log(group.name + " [" + group.type + "]");
-    console.log(group.source + " -> " + group.sourceResult);
-    for (let grp of group.group_columns) {
-        console.log(grp.name + " (" + grp.col_nr + ")" + " " + grp.group_mode);
-    }
-    console.log("");
+    // console.log(group.name + " [" + group.type + "]");
+    // console.log(group.source + " -> " + group.sourceResult);
+    // for (let grp of group.group_columns) {
+    //     console.log(grp.name + " " + grp.group_mode);
+    // }
+    // console.log("");
 
     return source.addTable(group_intern(group.sourceResult, source.getTable(group.source), group.group_columns));
 }
@@ -245,10 +245,12 @@ export function project_intern(name: string, data: Table, prjCond: ProjectCondit
     let keep_cols: number[] = [];
 
     for (let col of data.columns) {
+        let col_nr: number = data.getColNumberByName(col.name);
         for (let grpCol of prjCond) {
-            if (col.col_nr == grpCol.col_nr) {
+            let grp_col_nr: number = data.getColNumberByName(grpCol.name);
+            if (col_nr == grp_col_nr) {
                 res_columns.push(col);
-                keep_cols.push(col.col_nr)
+                keep_cols.push(col_nr)
             }
         }
     }
@@ -267,24 +269,24 @@ export function project_intern(name: string, data: Table, prjCond: ProjectCondit
 }
 
 export function group_intern(name: string, data: Table, grpCond: GroupConditionType[]): Table {
-    let result: Table = data;
     let keys: any[] = []; //Liste der Spaltennummern der Group-Spalten
     let aggs: number[] = []; //Liste der Spaltennummern der Agg-Spalten
     let orderCond: OrderConditionType[] = [];
     for (let gc of grpCond) {
         if (gc.group_mode == "key") {
-            let oc: OrderConditionType;
-            oc.col_nr = gc.col_nr;
+            let oc: OrderConditionType = {};
+            //oc.col_nr = data.getColNumberByName(gc.name);
             oc.name = gc.name;
             oc.order_mode = 'ASC';
             orderCond.push(oc);
-            keys.push(oc.col_nr);
+            keys.push(data.getColNumberByName(gc.name));
         }
-        else aggs.push(gc.col_nr);
+        else aggs.push(data.getColNumberByName(gc.name));
     }
 
-    result = order_intern(name, result, orderCond);
-    //console.log(result.toText());   
+    let result: Table = order_intern(name, data, orderCond);
+    //console.log( "group_intern -> order_intern" );
+    //console.log(result.toText(true));   
 
     let groupResult: Table = new Table(name, result.columns);
     groupResult.rows = new Array<Row>();
@@ -334,9 +336,13 @@ export function group_intern(name: string, data: Table, grpCond: GroupConditionT
     }
     //console.log( "new Row: " + sum + " " + count + " - " + newRow.row );
     groupResult.rows.push(newRow);
-    console.log(groupResult.toText(true));
+
+    //console.log( "group_intern result" );
+    //console.log(groupResult.toText(true));
 
     result = project_intern(name, groupResult, grpCond as ProjectConditionType[]);
+    //console.log( "group_intern -> project_intern" );
+    //console.log(result.toText(true));
 
     return result;
 }

@@ -107,7 +107,7 @@ export class Table {
         text += '\n'
         
         if( this.rows.length > 0 ) {
-            for( let inx = 0 ; inx < this.rows.length; inx++ ) {
+            for( let inx = 0 ; inx < this.rows.length && inx < 50; inx++ ) {
                 let row = this.rows[inx];
                 for( let value of row.row ) {
                     text += value + '\t';
@@ -116,10 +116,12 @@ export class Table {
                     text += row.rowMetaData != undefined ? " | " + JSON.stringify(row.rowMetaData) : "";
                 text += '\n'
             }
+            text += 'count=' + this.rows.length + '\n'
         } else {
             text += '(no data)'    
         }
         text += '\n'
+        
 
         return text;
     }

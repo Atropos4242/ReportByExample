@@ -70,8 +70,8 @@ function treeConSumIf(data, col_name, filterCol, filterRow, basisTable, basisRow
     return result;
 }
 function treeCon_intern(data_basis, data_dimension, result_table_name, transName) {
+    //console.log("TreeCon-Transformation intern");
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-    console.log("TreeCon-Transformation intern");
     let result = new Table_1.Table(result_table_name, data_basis.columns);
     for (let inx = 0; inx < data_basis.rows.length; inx++) {
         let row = data_basis.rows[inx];
@@ -109,8 +109,8 @@ function blowup(source, trans) {
 }
 exports.blowup = blowup;
 function blowup_intern(data_basis, data_dimension, result_table_name) {
+    //console.log("Blowup-Transformation intern");
     var _a;
-    console.log("Blowup-Transformation intern");
     let result = new Table_1.Table(result_table_name, data_basis.columns);
     for (let inx = 0; inx < data_basis.rows.length; inx++) {
         let row = data_basis.rows[inx];
@@ -187,12 +187,12 @@ function order_intern(name, data, orderCond) {
 }
 exports.order_intern = order_intern;
 function group(source, group) {
-    console.log(group.name + " [" + group.type + "]");
-    console.log(group.source + " -> " + group.sourceResult);
-    for (let grp of group.group_columns) {
-        console.log(grp.name + " (" + grp.col_nr + ")" + " " + grp.group_mode);
-    }
-    console.log("");
+    // console.log(group.name + " [" + group.type + "]");
+    // console.log(group.source + " -> " + group.sourceResult);
+    // for (let grp of group.group_columns) {
+    //     console.log(grp.name + " " + grp.group_mode);
+    // }
+    // console.log("");
     return source.addTable(group_intern(group.sourceResult, source.getTable(group.source), group.group_columns));
 }
 exports.group = group;
@@ -200,10 +200,12 @@ function project_intern(name, data, prjCond) {
     let res_columns = [];
     let keep_cols = [];
     for (let col of data.columns) {
+        let col_nr = data.getColNumberByName(col.name);
         for (let grpCol of prjCond) {
-            if (col.col_nr == grpCol.col_nr) {
+            let grp_col_nr = data.getColNumberByName(grpCol.name);
+            if (col_nr == grp_col_nr) {
                 res_columns.push(col);
-                keep_cols.push(col.col_nr);
+                keep_cols.push(col_nr);
             }
         }
     }
@@ -220,24 +222,24 @@ function project_intern(name, data, prjCond) {
 }
 exports.project_intern = project_intern;
 function group_intern(name, data, grpCond) {
-    let result = data;
     let keys = []; //Liste der Spaltennummern der Group-Spalten
     let aggs = []; //Liste der Spaltennummern der Agg-Spalten
     let orderCond = [];
     for (let gc of grpCond) {
         if (gc.group_mode == "key") {
-            let oc;
-            oc.col_nr = gc.col_nr;
+            let oc = {};
+            //oc.col_nr = data.getColNumberByName(gc.name);
             oc.name = gc.name;
             oc.order_mode = 'ASC';
             orderCond.push(oc);
-            keys.push(oc.col_nr);
+            keys.push(data.getColNumberByName(gc.name));
         }
         else
-            aggs.push(gc.col_nr);
+            aggs.push(data.getColNumberByName(gc.name));
     }
-    result = order_intern(name, result, orderCond);
-    //console.log(result.toText());   
+    let result = order_intern(name, data, orderCond);
+    //console.log( "group_intern -> order_intern" );
+    //console.log(result.toText(true));   
     let groupResult = new Table_1.Table(name, result.columns);
     groupResult.rows = new Array();
     let lastKeys = []; //letzter Zustand der Group-Spalten
@@ -283,8 +285,11 @@ function group_intern(name, data, grpCond) {
     }
     //console.log( "new Row: " + sum + " " + count + " - " + newRow.row );
     groupResult.rows.push(newRow);
-    console.log(groupResult.toText(true));
+    //console.log( "group_intern result" );
+    //console.log(groupResult.toText(true));
     result = project_intern(name, groupResult, grpCond);
+    //console.log( "group_intern -> project_intern" );
+    //console.log(result.toText(true));
     return result;
 }
 exports.group_intern = group_intern;
