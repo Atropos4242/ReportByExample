@@ -1,15 +1,11 @@
 import { Dataset } from './Dataset';
 import { ColumnType, TableMetaDataType } from './TableDataStructures';
-
-// export interface Column {
-//     col_nr : number;
-//     name : string;
-//     columnMetaData?: TableMetaData;
-// }
+import { TableMetaData } from './TableMetaData';
 
 export class Row {
     row : Array<any>;
-    rowMetaData?: TableMetaDataType;
+    //rowMetaData?: TableMetaDataType;
+    marked: string;
 
     constructor() {
         this.row = new Array<any>();
@@ -23,49 +19,59 @@ export class Table {
     rows : Array<Row>;
     url: string;
 
-    colNameNumber: Map<string,number>;
+    colNameNumberCache: Map<string,number>;
+    metaDataCache: TableMetaData;
+    markLine: Map<string, Row>;
 
     constructor( name : string, columns :  ColumnType[], url?: string ) {
         this.name = name;
         this.rows = new Array<Row>();
         this.columns = columns;
         this.url = url;
-        this.colNameNumber = new Map<string,number>;
+        this.colNameNumberCache = new Map<string,number>;
+        this.metaDataCache = new TableMetaData();
+        this.markLine = new Map<string, Row>;
+
+        for( let c = 0 ; c < columns.length ; c++ ) {
+            if( columns[c].columnMetaData != undefined ) {
+                for( let m = 0 ; m < columns[c].columnMetaData.length ; m++ ) {
+                    this.metaDataCache.addColMetaData(c, columns[c].columnMetaData[m] );
+                }
+            }
+        }
     }
 
-    getRowMetaData( index: number ) : TableMetaDataType {
-        return this.rows[index].rowMetaData;
-    }
-
-    setRowMetaData( index: number, md: TableMetaDataType ) {
-        this.rows[index].rowMetaData = md;
-    }
-
-    getColMetaData( index: number ) : TableMetaDataType {
-        return this.columns[index].columnMetaData;
-    }
-
-    setColMetaData( index: number, md: TableMetaDataType ) {
-        this.columns[index].columnMetaData = md;
+    getMetaData() : TableMetaData {
+        return this.metaDataCache;
     }
 
     getColNumberByName( name: string ) : number {
-        if( this.colNameNumber.get(name) != undefined ) return this.colNameNumber.get(name);
+        if( this.colNameNumberCache.get(name) != undefined ) return this.colNameNumberCache.get(name);
 
-        //console.log( "No cache hit: " + name + " in " + this.name);
+        //console.log( "No cache hit getColNumberByName: " + name + " in " + this.name);
 
         if( name == undefined ) throw Error("Colummn " + name + " not found in " + this.name );
 
         for( let i = 0 ; i < this.columns.length ; i++ )
         {
             if( this.columns[i].name.toLocaleLowerCase() == name.toLowerCase() ) {
-                this.colNameNumber.set(name,i);
+                this.colNameNumberCache.set(name,i);
                 return i;
             }
         }
-        this.colNameNumber.set(name,-1);
+        this.colNameNumberCache.set(name,-1);
         throw Error("Colummn " + name + " not found in " + this.name );
         return -1;
+    }
+
+    addMarkedLine( line: Row, marker: string ) {
+        this.markLine.set( marker, line );
+        line.marked=marker;
+        this.rows.push(line);
+    }
+
+    getMarkedLine( marker: string ) {
+        return this.markLine.get(marker);
     }
 
     setData( data : Dataset ) : Table
@@ -84,15 +90,21 @@ export class Table {
         //console.log(data.length);
         this.rows = new Array<Row>();
         //this.meta_data = new Array<TableMetaData>();
-        for( let row of data) {            
+        for( let row_inx = 0 ; row_inx < data.length; row_inx++ ) {        
             //console.log(row);            
             let r : Row = new Row();
-            for (const key of Object.keys(row)) {
-                if( key != "__META_DATA")
-                    r.row[this.getColNumberByName(key)]=row[key];
-                else
-                    r.rowMetaData = row[key] as TableMetaDataType;
-            }  
+            for (const key of Object.keys(data[row_inx])) {
+                if( key != "__META_DATA") {
+                    r.row[this.getColNumberByName(key)]=data[row_inx][key];
+                } else {
+                    //r.rowMetaData = row[key] as TableMetaDataType;
+                    let md: TableMetaDataType[] = data[row_inx][key];
+                    for( let m = 0 ; m < md.length ; m++ ) {
+                        let tmd: TableMetaDataType = {...md[m]};
+                        this.metaDataCache.addRowMetaData(row_inx,tmd);
+                    }
+                }
+            }
             this.rows.push(r);
         }
         return this;
@@ -107,13 +119,15 @@ export class Table {
         text += '\n'
         
         if( this.rows.length > 0 ) {
-            for( let inx = 0 ; inx < this.rows.length && inx < 50; inx++ ) {
+            for( let inx = 0 ; inx < this.rows.length && inx < 100; inx++ ) {
                 let row = this.rows[inx];
                 for( let value of row.row ) {
                     text += value + '\t';
                 }
-                if( ! excludeMetaData )
-                    text += row.rowMetaData != undefined ? " | " + JSON.stringify(row.rowMetaData) : "";
+                if( ! excludeMetaData ) {
+                    text += row.marked != undefined ? " | " + row.marked : "";
+                    text += this.getMetaData().getAllRowMetaData( inx ) != undefined ? " | " + JSON.stringify(this.getMetaData().getAllRowMetaData( inx )) : "";
+                }
                 text += '\n'
             }
             text += 'count=' + this.rows.length + '\n'

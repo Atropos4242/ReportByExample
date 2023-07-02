@@ -1,11 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Table = exports.Row = void 0;
-// export interface Column {
-//     col_nr : number;
-//     name : string;
-//     columnMetaData?: TableMetaData;
-// }
+const TableMetaData_1 = require("./TableMetaData");
 class Row {
     constructor() {
         this.row = new Array();
@@ -18,35 +14,43 @@ class Table {
         this.rows = new Array();
         this.columns = columns;
         this.url = url;
-        this.colNameNumber = new Map;
+        this.colNameNumberCache = new Map;
+        this.metaDataCache = new TableMetaData_1.TableMetaData();
+        this.markLine = new Map;
+        for (let c = 0; c < columns.length; c++) {
+            if (columns[c].columnMetaData != undefined) {
+                for (let m = 0; m < columns[c].columnMetaData.length; m++) {
+                    this.metaDataCache.addColMetaData(c, columns[c].columnMetaData[m]);
+                }
+            }
+        }
     }
-    getRowMetaData(index) {
-        return this.rows[index].rowMetaData;
-    }
-    setRowMetaData(index, md) {
-        this.rows[index].rowMetaData = md;
-    }
-    getColMetaData(index) {
-        return this.columns[index].columnMetaData;
-    }
-    setColMetaData(index, md) {
-        this.columns[index].columnMetaData = md;
+    getMetaData() {
+        return this.metaDataCache;
     }
     getColNumberByName(name) {
-        if (this.colNameNumber.get(name) != undefined)
-            return this.colNameNumber.get(name);
-        //console.log( "No cache hit: " + name + " in " + this.name);
+        if (this.colNameNumberCache.get(name) != undefined)
+            return this.colNameNumberCache.get(name);
+        //console.log( "No cache hit getColNumberByName: " + name + " in " + this.name);
         if (name == undefined)
             throw Error("Colummn " + name + " not found in " + this.name);
         for (let i = 0; i < this.columns.length; i++) {
             if (this.columns[i].name.toLocaleLowerCase() == name.toLowerCase()) {
-                this.colNameNumber.set(name, i);
+                this.colNameNumberCache.set(name, i);
                 return i;
             }
         }
-        this.colNameNumber.set(name, -1);
+        this.colNameNumberCache.set(name, -1);
         throw Error("Colummn " + name + " not found in " + this.name);
         return -1;
+    }
+    addMarkedLine(line, marker) {
+        this.markLine.set(marker, line);
+        line.marked = marker;
+        this.rows.push(line);
+    }
+    getMarkedLine(marker) {
+        return this.markLine.get(marker);
     }
     setData(data) {
         this.rows = new Array();
@@ -61,14 +65,21 @@ class Table {
         //console.log(data.length);
         this.rows = new Array();
         //this.meta_data = new Array<TableMetaData>();
-        for (let row of data) {
+        for (let row_inx = 0; row_inx < data.length; row_inx++) {
             //console.log(row);            
             let r = new Row();
-            for (const key of Object.keys(row)) {
-                if (key != "__META_DATA")
-                    r.row[this.getColNumberByName(key)] = row[key];
-                else
-                    r.rowMetaData = row[key];
+            for (const key of Object.keys(data[row_inx])) {
+                if (key != "__META_DATA") {
+                    r.row[this.getColNumberByName(key)] = data[row_inx][key];
+                }
+                else {
+                    //r.rowMetaData = row[key] as TableMetaDataType;
+                    let md = data[row_inx][key];
+                    for (let m = 0; m < md.length; m++) {
+                        let tmd = Object.assign({}, md[m]);
+                        this.metaDataCache.addRowMetaData(row_inx, tmd);
+                    }
+                }
             }
             this.rows.push(r);
         }
@@ -82,13 +93,15 @@ class Table {
         }
         text += '\n';
         if (this.rows.length > 0) {
-            for (let inx = 0; inx < this.rows.length && inx < 50; inx++) {
+            for (let inx = 0; inx < this.rows.length && inx < 100; inx++) {
                 let row = this.rows[inx];
                 for (let value of row.row) {
                     text += value + '\t';
                 }
-                if (!excludeMetaData)
-                    text += row.rowMetaData != undefined ? " | " + JSON.stringify(row.rowMetaData) : "";
+                if (!excludeMetaData) {
+                    text += row.marked != undefined ? " | " + row.marked : "";
+                    text += this.getMetaData().getAllRowMetaData(inx) != undefined ? " | " + JSON.stringify(this.getMetaData().getAllRowMetaData(inx)) : "";
+                }
                 text += '\n';
             }
             text += 'count=' + this.rows.length + '\n';

@@ -2,26 +2,39 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateTableDataStructureForm = void 0;
 const zod_1 = require("zod");
-const TableMetaDataTreeConColFltForm = zod_1.z.object({
+const TableMetaDataColFltForm = zod_1.z.object({
     FLT_COL: zod_1.z.string(),
     FLT_VALUE: zod_1.z.string().optional(),
     FLT_VALUE_COLUMN: zod_1.z.string().optional()
 }).strict();
-const TableMetaDataForm = zod_1.z.object({
-    TREECON: zod_1.z.object({
-        TRANS_NAME: zod_1.z.string(),
-        AGG_COL: zod_1.z.string().optional(),
-        COL_FLT: zod_1.z.array(TableMetaDataTreeConColFltForm).optional()
-    }).strict(),
-    BLOWUP: zod_1.z.object({
-        COLUMN: zod_1.z.string(),
-        TARGET_COLUMN: zod_1.z.string()
-    }).strict().optional()
-}).strict().optional();
+const LineSelectorForm = zod_1.z.object({
+    NAME: zod_1.z.string(),
+    COL_FLT: zod_1.z.array(TableMetaDataColFltForm)
+});
+const TransformationComputedLineForm = zod_1.z.object({
+    name: zod_1.z.string(),
+    type: zod_1.z.literal('COMP_LINE'),
+    sourceA: zod_1.z.string(),
+    sourceResult: zod_1.z.string(),
+    LINE_SELECTOR: zod_1.z.array(LineSelectorForm),
+    COLUMN_SELECTOR: zod_1.z.array(zod_1.z.string()),
+    EXPRESSION: zod_1.z.string()
+});
+const TableMetaDataTransformTreeConForm = zod_1.z.object({
+    TRANS_NAME: zod_1.z.string(),
+    AGG_COL: zod_1.z.string().optional(),
+    COL_FLT: zod_1.z.array(TableMetaDataColFltForm).optional()
+}).strict();
+const TableMetaDataTransformBlowupForm = zod_1.z.object({
+    TRANS_NAME: zod_1.z.string(),
+    COLUMN: zod_1.z.string(),
+    TARGET_COLUMN: zod_1.z.string()
+}).strict();
+const TableMetaDataForm = zod_1.z.union([TableMetaDataTransformTreeConForm, TableMetaDataTransformBlowupForm]);
 const ColumnForm = zod_1.z.object({
     col_nr: zod_1.z.number(),
     name: zod_1.z.string(),
-    columnMetaData: TableMetaDataForm,
+    columnMetaData: zod_1.z.array(TableMetaDataForm).optional(),
 }).strict().optional();
 const TransformationBlowupForm = zod_1.z.object({
     name: zod_1.z.string(),
@@ -85,7 +98,7 @@ const TransformationOrderForm = zod_1.z.object({
     sourceResult: zod_1.z.string(),
     order_columns: zod_1.z.array(OrderConditionForm)
 });
-const TransformationForm = zod_1.z.union([TransformationBlowupForm, TransformationTreeConForm, TransformationGroupForm, TransformationJoinForm, TransformationOrderForm]);
+const TransformationForm = zod_1.z.union([TransformationBlowupForm, TransformationTreeConForm, TransformationGroupForm, TransformationJoinForm, TransformationOrderForm, TransformationComputedLineForm]);
 const TableDataStructureForm = zod_1.z.object({
     tableDataStructures: zod_1.z.array(zod_1.z.object({
         name: zod_1.z.string(),

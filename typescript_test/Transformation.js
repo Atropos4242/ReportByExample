@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkConditionExpression = exports.checkCondition = exports.join_intern = exports.group_intern = exports.project_intern = exports.group = exports.order_intern = exports.order = exports.join = exports.blowup = exports.treeCon = exports.transformationError = exports.doTransformation = void 0;
+exports.checkConditionExpression = exports.checkCondition = exports.join_intern = exports.group_intern = exports.project_intern = exports.group = exports.order_intern = exports.order = exports.join = exports.blowup = exports.treeCon = exports.transformationError = exports.computedLine = exports.doTransformation = void 0;
 const Table_1 = require("./Table");
 function doTransformation(source, trans) {
     if (trans.type == "JOIN_FULL_TABLE_SCAN") {
@@ -18,16 +18,62 @@ function doTransformation(source, trans) {
     if (trans.type == "TREECON") {
         return treeCon(source, trans);
     }
+    if (trans.type == "COMP_LINE") {
+        return computedLine(source, trans);
+    }
     //throw new Error("Unknown transformation found " + trans.sourceA + " " + trans.type);
 }
 exports.doTransformation = doTransformation;
+function computedLine_intern(data, filter_col, col_selector, result_table_name, transName) {
+    let result = new Table_1.Table(result_table_name, data.columns);
+    //iterate over all rows
+    for (let inx = 0; inx < data.rows.length; inx++) {
+        //iterate over all LineSelectors
+        for (let inx_ls = 0; inx_ls < filter_col.length; inx_ls++) {
+            let filter_result = true;
+            //iterate over all Column-Filter (of each LineSelector)
+            for (let inx_cf = 0; inx_cf < filter_col[inx_ls].COL_FLT.length; inx_cf++) {
+                if (filter_col[inx_ls].COL_FLT[inx_cf] != undefined && filter_col[inx_ls].COL_FLT[inx_cf].FLT_VALUE != data.rows[inx].row[data.getColNumberByName(filter_col[inx_ls].COL_FLT[inx_cf].FLT_COL)]) {
+                    filter_result = false;
+                    break;
+                }
+            }
+            if (filter_result)
+                result.addMarkedLine(data.rows[inx], filter_col[inx_ls].NAME);
+        }
+    }
+    for (let sel_inx = 0; sel_inx < col_selector.length; sel_inx++) {
+        let col_nr = data.getColNumberByName(col_selector[sel_inx]);
+        console.log(" Calculating " + col_selector[sel_inx] + " = " + result.getMarkedLine("LINE_DIVIDENT").row[col_nr] + " / " + result.getMarkedLine("LINE_DIVISOR").row[col_nr]);
+        console.log(eval(result.getMarkedLine("LINE_DIVIDENT").row[col_nr] + " / " + result.getMarkedLine("LINE_DIVISOR").row[col_nr]));
+    }
+    return result;
+}
+function computedLine(source, trans) {
+    var _a, _b;
+    console.log("ComputedLine-Transformation");
+    try {
+        transformationError(trans.sourceResult == undefined, trans, "sourceResult is empty");
+        transformationError(source.getTable(trans.sourceA) == undefined, trans, "Table " + trans.sourceA + " not found");
+        transformationError(trans.LINE_SELECTOR == undefined, trans, "LINE_SELECTOR " + trans.name + " not found");
+        transformationError(((_a = trans.LINE_SELECTOR) === null || _a === void 0 ? void 0 : _a.length) == 0, trans, "LINE_SELECTOR " + trans.name + " has length 0");
+        transformationError(trans.COLUMN_SELECTOR == undefined, trans, "COLUMN_SELECTOR " + trans.name + " not found");
+        transformationError(((_b = trans.COLUMN_SELECTOR) === null || _b === void 0 ? void 0 : _b.length) == 0, trans, "COLUMN_SELECTOR " + trans.name + " has length 0");
+        return source.addTable(computedLine_intern(source.getTable(trans.sourceA), trans.LINE_SELECTOR, trans.COLUMN_SELECTOR, trans.sourceResult, trans.name));
+    }
+    catch (e) {
+        console.log("Error in Transformation ComputedLine [" + trans.name + "]: " + e);
+        throw Error(e);
+    }
+}
+exports.computedLine = computedLine;
 function transformationError(condition, trans, errText) {
     if (condition)
         throw new Error("Error in transformation " + trans.type + " [" + trans.name + "]" + ": " + errText);
 }
 exports.transformationError = transformationError;
 function treeCon(source, trans) {
-    console.log("TreeCon-Transformation");
+    console.log("TreeCon-Transformation " + trans.name);
     try {
         transformationError(trans.sourceResult == undefined, trans, "sourceResult is empty");
         transformationError(source.getTable(trans.sourceA) == undefined, trans, "Table " + trans.sourceA + " not found");
@@ -71,20 +117,23 @@ function treeConSumIf(data, col_name, filterCol, filterRow, basisTable, basisRow
 }
 function treeCon_intern(data_basis, data_dimension, result_table_name, transName) {
     //console.log("TreeCon-Transformation intern");
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d;
     let result = new Table_1.Table(result_table_name, data_basis.columns);
     for (let inx = 0; inx < data_basis.rows.length; inx++) {
         let row = data_basis.rows[inx];
         for (let col_inx = 0; col_inx < data_basis.columns.length; col_inx++) {
-            if (((_b = (_a = data_basis.columns[col_inx].columnMetaData) === null || _a === void 0 ? void 0 : _a.TREECON) === null || _b === void 0 ? void 0 : _b.AGG_COL) != undefined &&
-                ((_d = (_c = data_basis.columns[col_inx].columnMetaData) === null || _c === void 0 ? void 0 : _c.TREECON) === null || _d === void 0 ? void 0 : _d.TRANS_NAME) == transName &&
-                ((_f = (_e = row.rowMetaData) === null || _e === void 0 ? void 0 : _e.TREECON) === null || _f === void 0 ? void 0 : _f.TRANS_NAME) == transName) {
-                let filterColMeta = (_h = (_g = data_basis.columns[col_inx].columnMetaData) === null || _g === void 0 ? void 0 : _g.TREECON) === null || _h === void 0 ? void 0 : _h.COL_FLT;
-                let filterRowMeta = (_k = (_j = row.rowMetaData) === null || _j === void 0 ? void 0 : _j.TREECON) === null || _k === void 0 ? void 0 : _k.COL_FLT;
-                row.row[col_inx] = treeConSumIf(data_dimension, data_basis.columns[col_inx].columnMetaData.TREECON.AGG_COL, filterColMeta, filterRowMeta, data_basis, row);
+            if (data_basis.getMetaData().getRowMetaData(inx, transName) != undefined &&
+                ((_a = data_basis.getMetaData().getColTreeConMetaData(col_inx, transName)) === null || _a === void 0 ? void 0 : _a.AGG_COL)) {
+                let filterColMeta = (_b = data_basis.getMetaData().getColTreeConMetaData(col_inx, transName)) === null || _b === void 0 ? void 0 : _b.COL_FLT;
+                let filterRowMeta = (_c = data_basis.getMetaData().getRowTreeConMetaData(inx, transName)) === null || _c === void 0 ? void 0 : _c.COL_FLT;
+                row.row[col_inx] = treeConSumIf(data_dimension, (_d = data_basis.getMetaData().getColTreeConMetaData(col_inx, transName)) === null || _d === void 0 ? void 0 : _d.AGG_COL, filterColMeta, filterRowMeta, data_basis, row);
             }
         }
         result.rows.push(row);
+        //copy Row-Metadata
+        for (const rmd of data_basis.getMetaData().getAllRowMetaData(inx)) {
+            result.getMetaData().addRowMetaData(result.rows.length - 1, rmd);
+        }
     }
     return result;
 }
@@ -96,46 +145,48 @@ function blowup(source, trans) {
     transformationError(source.getTable(trans.sourceA).columns.find(x => x.name == trans.blowup_srcA_col_name) == undefined, trans, "Column " + trans.blowup_srcA_col_name + " not found in table " + trans.sourceA);
     transformationError(source.getTable(trans.sourceB).columns.find(x => x.name == trans.blowup_srcB_col_name) == undefined, trans, "Column " + trans.blowup_srcB_col_name + " not found in table " + trans.sourceB);
     for (let inx = 0; inx < source.getTable(trans.sourceA).rows.length; inx++) {
-        if (source.getTable(trans.sourceA).getColMetaData[inx] != undefined &&
-            source.getTable(trans.sourceA).getColMetaData[inx].blowup != undefined &&
-            source.getTable(trans.sourceA).getColMetaData[inx].blowup.BLOWUP_COLUMN != undefined &&
-            source.getTable(trans.sourceA).getColMetaData[inx].blowup.BLOWUP_TARGET_COLUMN != undefined) {
-            let col_nr_A = source.getTable(trans.sourceA).columns.find(x => x.name == source.getTable(trans.sourceA).getColMetaData[inx].blowup.BLOWUP_COLUMN).col_nr;
-            let col_nr_B = source.getTable(trans.sourceB).columns.find(x => x.name == source.getTable(trans.sourceA).getColMetaData[inx].blowup.BLOWUP_TARGET_COLUMN).col_nr;
-            source.getTable(trans.sourceA).getColMetaData[inx].blowup.setBlowupColumns(col_nr_A, col_nr_B);
+        if (source.getTable(trans.sourceA).getMetaData().getColMetaData(inx, trans.name) != undefined) {
+            let col_nr_A = source.getTable(trans.sourceA).getColNumberByName(source.getTable(trans.sourceA).getMetaData().getColBlowupMetaData(inx, trans.name).COLUMN);
+            let col_nr_B = source.getTable(trans.sourceB).getColNumberByName(source.getTable(trans.sourceB).getMetaData().getColBlowupMetaData(inx, trans.name).TARGET_COLUMN);
+            source.getTable(trans.sourceA).getMetaData().getColMetaData[inx].blowup.setBlowupColumns(col_nr_A, col_nr_B);
         }
     }
-    return source.addTable(blowup_intern(source.getTable(trans.sourceA), source.getTable(trans.sourceB), trans.sourceResult));
+    return source.addTable(blowup_intern(source.getTable(trans.sourceA), source.getTable(trans.sourceB), trans.sourceResult, trans.name));
 }
 exports.blowup = blowup;
-function blowup_intern(data_basis, data_dimension, result_table_name) {
+function blowup_intern(data_basis, data_dimension, result_table_name, transName) {
     //console.log("Blowup-Transformation intern");
-    var _a;
     let result = new Table_1.Table(result_table_name, data_basis.columns);
     for (let inx = 0; inx < data_basis.rows.length; inx++) {
         let row = data_basis.rows[inx];
-        //row for blowing up is marked with "BLOWUP" as content
-        if (((_a = data_basis === null || data_basis === void 0 ? void 0 : data_basis.getRowMetaData(inx)) === null || _a === void 0 ? void 0 : _a.BLOWUP) != undefined) {
+        //row for blowing up is marked with BlowupMetaData
+        if ((data_basis === null || data_basis === void 0 ? void 0 : data_basis.getMetaData().getRowBlowupMetaData(inx, transName)) != undefined) {
             //console.log(data_basis.meta_data[inx].toText());
             for (let rowdim of data_dimension.rows) {
                 let new_row = new Table_1.Row();
                 //copy row and replace one column         
                 for (let a = 0; a < row.row.length; a++) {
-                    if (data_basis.columns[a].name == data_basis.getRowMetaData(inx).BLOWUP.COLUMN) {
-                        new_row.row.push(rowdim.row[data_dimension.getColNumberByName(data_basis.getRowMetaData(inx).BLOWUP.TARGET_COLUMN)]);
+                    if (data_basis.columns[a].name == data_basis.getMetaData().getRowBlowupMetaData(inx, transName).COLUMN) {
+                        new_row.row.push(rowdim.row[data_dimension.getColNumberByName(data_basis.getMetaData().getRowBlowupMetaData(inx, transName).TARGET_COLUMN)]);
                     }
                     else {
                         new_row.row.push(row.row[a]);
                     }
                 }
-                //copy Metadata
-                new_row.rowMetaData = row.rowMetaData;
                 result.rows.push(new_row);
+                //copy Row-Metadata
+                for (const rmd of data_basis.getMetaData().getAllRowMetaData(inx)) {
+                    result.getMetaData().addRowMetaData(result.rows.length - 1, rmd);
+                }
             }
         }
         //plain copy any other row
         else {
             result.rows.push(row);
+            //copy Row-Metadata
+            for (const rmd of data_basis.getMetaData().getAllRowMetaData(inx)) {
+                result.getMetaData().addRowMetaData(result.rows.length - 1, rmd);
+            }
         }
     }
     return result;

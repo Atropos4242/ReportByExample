@@ -1,28 +1,45 @@
 import { z } from "zod"
 
-const TableMetaDataTreeConColFltForm = z.object({ 
-        FLT_COL: z.string(), 
-        FLT_VALUE: z.string().optional(),
-        FLT_VALUE_COLUMN: z.string().optional()
-    }).strict()
+const TableMetaDataColFltForm = z.object({ 
+    FLT_COL: z.string(), 
+    FLT_VALUE: z.string().optional(),
+    FLT_VALUE_COLUMN: z.string().optional()
+}).strict()
 
-const TableMetaDataForm = z.object({
-    TREECON: z.object({ 
-        TRANS_NAME: z.string(),
-        AGG_COL: z.string().optional(), 
-        COL_FLT: z.array(TableMetaDataTreeConColFltForm).optional()
-    }).strict(),
-    BLOWUP: z.object({ 
-        COLUMN: z.string(), 
-        TARGET_COLUMN: z.string()
-    }).strict().optional()    
-}).strict().optional();    
+const LineSelectorForm = z.object({
+    NAME: z.string(),
+    COL_FLT: z.array(TableMetaDataColFltForm)
+});
+
+const TransformationComputedLineForm = z.object({
+    name: z.string(),
+    type: z.literal('COMP_LINE'),
+    sourceA: z.string(),
+    sourceResult: z.string(),
+    LINE_SELECTOR: z.array(LineSelectorForm),
+    COLUMN_SELECTOR: z.array(z.string()),
+    EXPRESSION: z.string()
+});
+
+const TableMetaDataTransformTreeConForm = z.object({ 
+    TRANS_NAME: z.string(),
+    AGG_COL: z.string().optional(), 
+    COL_FLT: z.array(TableMetaDataColFltForm).optional()
+}).strict();
+
+const TableMetaDataTransformBlowupForm = z.object({ 
+    TRANS_NAME: z.string(),
+    COLUMN: z.string(), 
+    TARGET_COLUMN: z.string()
+}).strict();
+
+const TableMetaDataForm = z.union([TableMetaDataTransformTreeConForm,TableMetaDataTransformBlowupForm]);   
 
 const ColumnForm = z.object({ 
     col_nr: z.number(), 
     name: z.string(), 
-    columnMetaData: TableMetaDataForm,
-    }).strict().optional()
+    columnMetaData: z.array(TableMetaDataForm).optional(),
+}).strict().optional()
 
 const TransformationBlowupForm = z.object({
     name: z.string(),
@@ -96,7 +113,7 @@ const TransformationOrderForm =  z.object({
     order_columns: z.array(OrderConditionForm)
 })
 
-const TransformationForm = z.union([TransformationBlowupForm,TransformationTreeConForm,TransformationGroupForm,TransformationJoinForm,TransformationOrderForm]);
+const TransformationForm = z.union([TransformationBlowupForm,TransformationTreeConForm,TransformationGroupForm,TransformationJoinForm,TransformationOrderForm,TransformationComputedLineForm]);
 
 const TableDataStructureForm = z.object({
     tableDataStructures: z.array( 
@@ -122,7 +139,11 @@ export type JoinConditionType = z.infer<typeof JoinConditionForm>;
 export type TransformationJoinType = z.infer<typeof TransformationJoinForm>;
 export type TransformationGroupType = z.infer<typeof TransformationGroupForm>;
 export type TransformationOrderType = z.infer<typeof TransformationOrderForm>;
-export type TableMetaDataTreeConColFltType = z.infer<typeof TableMetaDataTreeConColFltForm>;
+export type TableMetaDataColFltType = z.infer<typeof TableMetaDataColFltForm>;
+export type TableMetaDataTransformTreeConType = z.infer<typeof TableMetaDataTransformTreeConForm>;
+export type TableMetaDataTransformBlowupType = z.infer<typeof TableMetaDataTransformBlowupForm>;
+export type TransformationComputedLineType = z.infer<typeof TransformationComputedLineForm>;
+export type LineSelectorType = z.infer<typeof LineSelectorForm>;
 
 export function validateTableDataStructureForm(tds: any) {
     TableDataStructureForm.parse(tds);

@@ -27,27 +27,103 @@
             "url": "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=GW.F_ABSATZ_DATA&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV"
         },
         {
+            "name": "T.ABSATZ_B2B",
+            "columns" : [
+                {"col_nr": 1, "name":"JAHR"},
+                {"col_nr": 2, "name":"MONAT"},
+                {"col_nr": 3, "name":"MARKE"},
+                {"col_nr": 4, "name":"ABSATZ"},
+                {"col_nr": 5, "name":"ABSATZB2B"}
+            ],
+            "url": "http://ws-martin2:8080/api/generic/fetchData?plain=false&function=GW.F_ABSATZ_B2B_DATA&ebene=GESAMT&region=-999&gebiet=-999&kette=-999&partner=-999&orgaId=V-GLV"
+        },
+        {
             "name": "T.GW_ABSATZ_TAB",
             "columns" : [
                 {"col_nr": 0, "name":"SORT"}, 
                 {"col_nr": 1, "name":"TREE_1"}, 
                 {"col_nr": 2, "name":"TREE_2"},
                 {"col_nr": 3, "name":"TREE_3"},
-                {"col_nr": 4, "name":"GESAMT","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": []}}},
-                {"col_nr": 5, "name":"M1","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "1" }]}}},
-                {"col_nr": 6, "name":"M2","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "2" }]}}},
-                {"col_nr": 7, "name":"M3","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "3" }]}}},
-                {"col_nr": 8, "name":"M4","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "4" }]}}},
-                {"col_nr": 9, "name":"M5","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "5" }]}}},
-                {"col_nr": 10, "name":"M6","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "6" }]}}},
-                {"col_nr": 11, "name":"M7","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "7" }]}}},
-                {"col_nr": 12, "name":"M8","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "8" }]}}},
-                {"col_nr": 13, "name":"M9","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "9" }]}}},
-                {"col_nr": 14, "name":"M10","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "10" }]}}},
-                {"col_nr": 15, "name":"M11","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "11" }]}}},
-                {"col_nr": 16, "name":"M12","columnMetaData": { "TREECON": { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "12" }]}}}
+                {"col_nr": 4, "name":"GESAMT",
+                    "columnMetaData": [ 
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": []},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": []}
+                    ]
+                },
+                {"col_nr": 5, "name":"M1",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "1" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "1" }]}
+                    ]
+                },
+                {"col_nr": 6, "name":"M2",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "2" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "2" }]}
+                    ]
+                },
+                {"col_nr": 7, "name":"M3",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "3" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "3" }]}
+                    ]
+                },
+                {"col_nr": 8, "name":"M4",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "4" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "4" }]}
+                    ]
+                },
+                {"col_nr": 9, "name":"M5",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "5" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "5" }]}
+                    ]
+                },
+                {"col_nr": 10, "name":"M6",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "6" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "6" }]}
+                    ]
+                },
+                {"col_nr": 11, "name":"M7",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "7" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "7" }]}
+                    ]
+                },
+                {"col_nr": 12, "name":"M8",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "8" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "8" }]}
+                    ]
+                },
+                {"col_nr": 13, "name":"M9",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "9" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "9" }]}
+                    ]
+                },
+                {"col_nr": 14, "name":"M10",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "10" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "10" }]}
+                    ]
+                },
+                {"col_nr": 15, "name":"M11",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "11" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B","COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "10" }]}
+                    ]
+                },
+                {"col_nr": 16, "name":"M12",
+                    "columnMetaData": [
+                        { "TRANS_NAME": "TC_ABSATZ","AGG_COL": "ABSATZ", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "12" }]},
+                        { "TRANS_NAME": "TC_ABSATZ_B2B","AGG_COL": "ABSATZB2B", "COL_FLT": [{ "FLT_COL": "MONAT", "FLT_VALUE": "10" }]}
+                    ]
+                }
             ]
-         }
+        }
     ],
     "transformations":
     [
@@ -66,7 +142,7 @@
             ]
         },
         {
-            "name" : "Aufblasen Modelle",
+            "name" : "BLOWUP_MOD",
             "type" : "BLOWUP",
             "sourceA" : "T.GW_ABSATZ_TAB",
             "sourceB" : "T.GW_MODELL",
@@ -80,6 +156,43 @@
             "sourceA" : "T.GW_ABSATZ_TAB_2",
             "sourceB" : "T.ABSATZ_GROUP_MON_MOD_GES",
             "sourceResult" : "T.GW_ABSATZ_TAB_3"
+        },
+        {
+            "name" : "TC_ABSATZ_B2B",
+            "type" : "TREECON",
+            "sourceA" : "T.GW_ABSATZ_TAB_3",
+            "sourceB" : "T.ABSATZ_B2B",
+            "sourceResult" : "T.GW_ABSATZ_TAB_FINAL"
+        },
+        {
+            "name" : "CL_ABSATZ_B2B",
+            "type" : "COMP_LINE",
+            "sourceA" : "T.GW_ABSATZ_TAB_FINAL",
+            "sourceResult" : "T.GW_ABSATZ_TAB_FINAL_2",
+            "LINE_SELECTOR" : [
+                {
+                    "NAME": "LINE_DIVIDENT",
+                    "COL_FLT": 
+                    [
+                        {
+                            "FLT_COL": "SORT",
+                            "FLT_VALUE": "1"
+                        }
+                    ]
+                },
+                {
+                    "NAME": "LINE_DIVISOR",
+                    "COL_FLT": 
+                    [
+                        {
+                            "FLT_COL": "SORT",
+                            "FLT_VALUE": "6"
+                        }
+                    ]
+                }
+            ],
+            "COLUMN_SELECTOR": ["GESAMT","M1","M2","M3","M4","M5","M6","M7","M8","M9","M10","M11","M12"],
+            "EXPRESSION":"LINE_DIVIDENT/LINE_DIVISOR"
         }
     ]
 
