@@ -74,6 +74,10 @@ export class Table {
         return this.markLine.get(marker);
     }
 
+    getMarkedLinesMarker() : IterableIterator<string> {
+        return this.markLine.keys();
+    }
+
     setData( data : Dataset ) : Table
     {        
         this.rows = new Array<Row>();

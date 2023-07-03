@@ -26,7 +26,7 @@ export function doTransformation(source: DataSource, trans: TransformationType):
 
 }
 
-function computedLine_intern(data: Table, filter_col: LineSelectorType[], col_selector: string[], result_table_name: string, transName: string): Table {
+function computedLine_intern(data: Table, transExpr: string, filter_col: LineSelectorType[], col_selector: string[], result_table_name: string, transName: string): Table {
     let result = new Table(result_table_name, data.columns);
 
     //iterate over all rows
@@ -48,11 +48,26 @@ function computedLine_intern(data: Table, filter_col: LineSelectorType[], col_se
         }
     }
 
+    let new_row = Object.assign({}, result.rows[0])
+
     for( let sel_inx = 0 ; sel_inx < col_selector.length ; sel_inx++ ) {
         let col_nr: number = data.getColNumberByName( col_selector[sel_inx]);
-        console.log(" Calculating " + col_selector[sel_inx] + " = " + result.getMarkedLine("LINE_DIVIDENT").row[col_nr] + " / " + result.getMarkedLine("LINE_DIVISOR").row[col_nr] );
-        console.log(eval(result.getMarkedLine("LINE_DIVIDENT").row[col_nr] + " / " + result.getMarkedLine("LINE_DIVISOR").row[col_nr]));
+
+        let parameter: string = "";
+        for( const marker of result.getMarkedLinesMarker()) {
+            parameter += `let ${marker}=${result.getMarkedLine(marker).row[col_nr]};\n`
+        }
+
+        let expr = parameter + transExpr;
+        console.log(" Calculating " + expr );
+
+        let expr_res = eval(expr);
+        console.log(expr_res);
+
+        new_row.row[col_selector[sel_inx]]=expr_res;
     }
+
+    result.rows.push(new_row);
 
     return result;
 }
@@ -68,7 +83,7 @@ export function computedLine(source: DataSource, trans: TransformationComputedLi
         transformationError(trans.COLUMN_SELECTOR == undefined, trans, "COLUMN_SELECTOR " + trans.name + " not found");
         transformationError(trans.COLUMN_SELECTOR?.length == 0, trans, "COLUMN_SELECTOR " + trans.name + " has length 0");
 
-        return source.addTable(computedLine_intern(source.getTable(trans.sourceA), trans.LINE_SELECTOR, trans.COLUMN_SELECTOR, trans.sourceResult, trans.name));
+        return source.addTable(computedLine_intern(source.getTable(trans.sourceA), trans.EXPRESSION, trans.LINE_SELECTOR, trans.COLUMN_SELECTOR, trans.sourceResult, trans.name));
     } catch(e: any ) {
         console.log( "Error in Transformation ComputedLine [" + trans.name + "]: " + e );
         throw Error(e);

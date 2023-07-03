@@ -52,6 +52,9 @@ class Table {
     getMarkedLine(marker) {
         return this.markLine.get(marker);
     }
+    getMarkedLinesMarker() {
+        return this.markLine.keys();
+    }
     setData(data) {
         this.rows = new Array();
         for (let row of data.rows) {
