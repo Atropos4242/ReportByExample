@@ -26,11 +26,13 @@ function doTransformation(source, trans) {
 exports.doTransformation = doTransformation;
 function computedLine_intern(data, transExpr, filter_col, col_selector, result_table_name, transName) {
     let result = new Table_1.Table(result_table_name, data.columns);
+    let targetLine;
     //iterate over all rows
     for (let inx = 0; inx < data.rows.length; inx++) {
+        let filter_result = false;
         //iterate over all LineSelectors
         for (let inx_ls = 0; inx_ls < filter_col.length; inx_ls++) {
-            let filter_result = true;
+            filter_result = true;
             //iterate over all Column-Filter (of each LineSelector)
             for (let inx_cf = 0; inx_cf < filter_col[inx_ls].COL_FLT.length; inx_cf++) {
                 if (filter_col[inx_ls].COL_FLT[inx_cf] != undefined && filter_col[inx_ls].COL_FLT[inx_cf].FLT_VALUE != data.rows[inx].row[data.getColNumberByName(filter_col[inx_ls].COL_FLT[inx_cf].FLT_COL)]) {
@@ -38,11 +40,20 @@ function computedLine_intern(data, transExpr, filter_col, col_selector, result_t
                     break;
                 }
             }
-            if (filter_result)
+            if (filter_result) {
+                if (filter_col[inx_ls].NAME == "TARGET")
+                    targetLine = data.rows[inx];
                 result.addMarkedLine(data.rows[inx], filter_col[inx_ls].NAME);
+                break;
+            }
         }
+        if (!filter_result)
+            result.rows.push(data.rows[inx]);
     }
-    let new_row = Object.assign({}, result.rows[0]);
+    if (targetLine == undefined)
+        throw Error("No TARGET Line-Selector defined!");
+    //let new_row = new Row();
+    //new_row.row= Array.from(result.rows[0].row);
     for (let sel_inx = 0; sel_inx < col_selector.length; sel_inx++) {
         let col_nr = data.getColNumberByName(col_selector[sel_inx]);
         let parameter = "";
@@ -50,12 +61,12 @@ function computedLine_intern(data, transExpr, filter_col, col_selector, result_t
             parameter += `let ${marker}=${result.getMarkedLine(marker).row[col_nr]};\n`;
         }
         let expr = parameter + transExpr;
-        console.log(" Calculating " + expr);
+        //console.log(" Calculating " + expr );
         let expr_res = eval(expr);
-        console.log(expr_res);
-        new_row.row[col_selector[sel_inx]] = expr_res;
+        //console.log(expr_res);
+        targetLine.row[col_nr] = expr_res;
     }
-    result.rows.push(new_row);
+    //result.rows.push(targetLine);
     return result;
 }
 function computedLine(source, trans) {

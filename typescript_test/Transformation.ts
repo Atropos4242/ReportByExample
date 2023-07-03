@@ -28,13 +28,15 @@ export function doTransformation(source: DataSource, trans: TransformationType):
 
 function computedLine_intern(data: Table, transExpr: string, filter_col: LineSelectorType[], col_selector: string[], result_table_name: string, transName: string): Table {
     let result = new Table(result_table_name, data.columns);
+    let targetLine: Row;
 
     //iterate over all rows
     for (let inx = 0; inx < data.rows.length; inx++) {
-        
+        let filter_result: boolean = false;
+
         //iterate over all LineSelectors
         for (let inx_ls = 0; inx_ls < filter_col.length; inx_ls++) {
-            let filter_result: boolean = true;
+            filter_result=true;
             
             //iterate over all Column-Filter (of each LineSelector)
             for (let inx_cf = 0; inx_cf < filter_col[inx_ls].COL_FLT.length; inx_cf++) {
@@ -44,11 +46,25 @@ function computedLine_intern(data: Table, transExpr: string, filter_col: LineSel
                 }
             }   
 
-            if( filter_result ) result.addMarkedLine(data.rows[inx], filter_col[inx_ls].NAME );
+            if( filter_result )
+            {
+                if(filter_col[inx_ls].NAME=="TARGET") 
+                    targetLine=data.rows[inx];
+
+                result.addMarkedLine(data.rows[inx], filter_col[inx_ls].NAME );
+                break;
+            }   
         }
+
+        if( ! filter_result )
+            result.rows.push(data.rows[inx]);
     }
 
-    let new_row = Object.assign({}, result.rows[0])
+    if( targetLine == undefined )
+        throw Error( "No TARGET Line-Selector defined!" );
+
+    //let new_row = new Row();
+    //new_row.row= Array.from(result.rows[0].row);
 
     for( let sel_inx = 0 ; sel_inx < col_selector.length ; sel_inx++ ) {
         let col_nr: number = data.getColNumberByName( col_selector[sel_inx]);
@@ -59,15 +75,15 @@ function computedLine_intern(data: Table, transExpr: string, filter_col: LineSel
         }
 
         let expr = parameter + transExpr;
-        console.log(" Calculating " + expr );
+        //console.log(" Calculating " + expr );
 
         let expr_res = eval(expr);
-        console.log(expr_res);
+        //console.log(expr_res);
 
-        new_row.row[col_selector[sel_inx]]=expr_res;
+        targetLine.row[col_nr]=expr_res;
     }
 
-    result.rows.push(new_row);
+    //result.rows.push(targetLine);
 
     return result;
 }
