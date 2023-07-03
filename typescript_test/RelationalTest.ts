@@ -22,18 +22,18 @@ function beforeTrans() {
 }
 
 function afterTrans() {
-    // let final_result: string = "T.GW_ABSATZ_TAB_FINAL"
-    // if( source.getTable(final_result) != undefined )
-    //     console.log(source.getTable(final_result).toText(true));
-    // else
-    //     console.log("No result table [" + final_result+ "] returned");
+    let final_result: string = "T.GW_ABSATZ_TAB_FINAL"
+    if( source.getTable(final_result) != undefined )
+        console.log(source.getTable(final_result).toText(true));
+    else
+        console.log("No result table [" + final_result+ "] returned");
 }
 
 function afterEveryTrans(tablename: string) {
-    if( source.getTable(tablename) != undefined )
-        console.log(source.getTable(tablename).toText(false));
-    else
-        console.log("No result table [" + tablename + "] returned");
+    // if( source.getTable(tablename) != undefined )
+    //     console.log(source.getTable(tablename).toText(false));
+    // else
+    //     console.log("No result table [" + tablename + "] returned");
 }
 validateTableDataStructureForm(tableDataStructure);
 

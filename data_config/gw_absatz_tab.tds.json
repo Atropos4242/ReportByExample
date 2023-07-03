@@ -170,12 +170,12 @@
             "sourceA" : "T.GW_ABSATZ_TAB_FINAL",
             "sourceResult" : "T.GW_ABSATZ_TAB_FINAL_2",
             "LINE_SELECTOR" : [
-                { "NAME": "LINE_DIVIDENT", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "1" } ] },
-                { "NAME": "LINE_DIVISOR", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "6"} ] },
+                { "NAME": "LINE_DIVISOR", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "1" } ] },
+                { "NAME": "LINE_DIVIDENT", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "6"} ] },
                 { "NAME": "TARGET", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "9" } ] }
             ],
             "COLUMN_SELECTOR": ["GESAMT","M1","M2","M3","M4","M5","M6","M7","M8","M9","M10","M11","M12"],
-            "EXPRESSION":"LINE_DIVIDENT/LINE_DIVISOR"
+            "EXPRESSION":"(LINE_DIVIDENT/LINE_DIVISOR).toFixed(2)"
         },
         {
             "name" : "CL_ABSATZ_B2B_AUDI",
@@ -183,12 +183,12 @@
             "sourceA" : "T.GW_ABSATZ_TAB_FINAL_2",
             "sourceResult" : "T.GW_ABSATZ_TAB_FINAL_3",
             "LINE_SELECTOR" : [
-                { "NAME": "LINE_DIVIDENT", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "2" } ] },
-                { "NAME": "LINE_DIVISOR", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "7"} ] },
+                { "NAME": "LINE_DIVISOR", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "2" } ] },
+                { "NAME": "LINE_DIVIDENT", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "7"} ] },
                 { "NAME": "TARGET", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "10" } ] }
             ],
             "COLUMN_SELECTOR": ["GESAMT","M1","M2","M3","M4","M5","M6","M7","M8","M9","M10","M11","M12"],
-            "EXPRESSION":"LINE_DIVIDENT/LINE_DIVISOR"
+            "EXPRESSION":"(LINE_DIVIDENT/LINE_DIVISOR).toFixed(2)"
         },
         {
             "name" : "CL_ABSATZ_B2B_ANDERE",
@@ -196,12 +196,12 @@
             "sourceA" : "T.GW_ABSATZ_TAB_FINAL_3",
             "sourceResult" : "T.GW_ABSATZ_TAB_FINAL_4",
             "LINE_SELECTOR" : [
-                { "NAME": "LINE_DIVIDENT", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "3" } ] },
-                { "NAME": "LINE_DIVISOR", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "8"} ] },
+                { "NAME": "LINE_DIVISOR", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "5" } ] },
+                { "NAME": "LINE_DIVIDENT", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "8"} ] },
                 { "NAME": "TARGET", "COL_FLT": [ { "FLT_COL": "SORT", "FLT_VALUE": "11" } ] }
             ],
             "COLUMN_SELECTOR": ["GESAMT","M1","M2","M3","M4","M5","M6","M7","M8","M9","M10","M11","M12"],
-            "EXPRESSION":"LINE_DIVIDENT/LINE_DIVISOR"
+            "EXPRESSION":"(LINE_DIVIDENT/LINE_DIVISOR).toFixed(2)"
         }
     ]
 

@@ -88,18 +88,38 @@ class Table {
         }
         return this;
     }
+    padText(col_pad, str2pad) {
+        return (col_pad + str2pad).slice(-(col_pad.length));
+    }
     toText(excludeMetaData) {
+        let col_width = [];
+        let col_pad = [];
+        for (let r = 0; r < this.rows.length; r++) {
+            for (let c = 0; c < this.columns.length; c++) {
+                if (col_width[c] == undefined)
+                    col_width[c] = this.columns[c].name.length;
+                if (col_width[c] < (this.rows[r].row[c] + "").length)
+                    col_width[c] = (this.rows[r].row[c] + "").length;
+            }
+        }
+        //console.log( col_width );
+        for (let i = 0; i < col_width.length; i++) {
+            col_pad[i] = "";
+            for (let a = 0; a < col_width[i]; a++) {
+                col_pad[i] += " ";
+            }
+        }
         let text;
         text = this.name + ':\n';
-        for (let col of this.columns) {
-            text += col.name + '\t';
+        for (let c = 0; c < this.columns.length; c++) {
+            text += this.padText(col_pad[c], this.columns[c].name) + ' ';
         }
         text += '\n';
         if (this.rows.length > 0) {
             for (let inx = 0; inx < this.rows.length && inx < 100; inx++) {
                 let row = this.rows[inx];
-                for (let value of row.row) {
-                    text += value + '\t';
+                for (let v = 0; v < row.row.length; v++) {
+                    text += this.padText(col_pad[v], row.row[v]) + ' ';
                 }
                 if (!excludeMetaData) {
                     text += row.marked != undefined ? " | " + row.marked : "";

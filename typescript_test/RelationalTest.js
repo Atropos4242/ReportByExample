@@ -20,17 +20,17 @@ function beforeTrans() {
     //console.log(source.getTable("T.ABSATZ").toText(false));
 }
 function afterTrans() {
-    // let final_result: string = "T.GW_ABSATZ_TAB_FINAL"
-    // if( source.getTable(final_result) != undefined )
-    //     console.log(source.getTable(final_result).toText(true));
-    // else
-    //     console.log("No result table [" + final_result+ "] returned");
+    let final_result = "T.GW_ABSATZ_TAB_FINAL";
+    if (source.getTable(final_result) != undefined)
+        console.log(source.getTable(final_result).toText(true));
+    else
+        console.log("No result table [" + final_result + "] returned");
 }
 function afterEveryTrans(tablename) {
-    if (source.getTable(tablename) != undefined)
-        console.log(source.getTable(tablename).toText(false));
-    else
-        console.log("No result table [" + tablename + "] returned");
+    // if( source.getTable(tablename) != undefined )
+    //     console.log(source.getTable(tablename).toText(false));
+    // else
+    //     console.log("No result table [" + tablename + "] returned");
 }
 (0, TableDataStructures_1.validateTableDataStructureForm)(gw_absatz_tab_tds_json_1.default);
 source = new DataSource_1.DataSource(gw_absatz_tab_tds_json_1.default);
