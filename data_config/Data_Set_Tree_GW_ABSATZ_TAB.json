@@ -14,7 +14,7 @@
             }
         ]
     },
-    { "sort": "3", "TREE_1": "Gesamt", "TREE_2": "Audi", "TREE_3": "BLOWUP", 
+    { "sort": "3", "TREE_1": "Gesamt", "TREE_2": "Audi", "TREE_3": "ALLE", 
         "__META_DATA":  [
             {
                 "TRANS_NAME": "BLOWUP_MOD",

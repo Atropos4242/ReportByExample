@@ -36,7 +36,6 @@ const TableMetaDataTransformBlowupForm = z.object({
 const TableMetaDataForm = z.union([TableMetaDataTransformTreeConForm,TableMetaDataTransformBlowupForm]);   
 
 const ColumnForm = z.object({ 
-    col_nr: z.number(), 
     name: z.string(), 
     columnMetaData: z.array(TableMetaDataForm).optional(),
 }).strict().optional()

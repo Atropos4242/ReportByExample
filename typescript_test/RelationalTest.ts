@@ -10,14 +10,16 @@ function gatherLocalData() {
     const start = performance.now();
 
     source.getTable("T.GW_ABSATZ_TAB").setDataNotPlain(data_GW_ABSATZ_TAB);
-    console.log(source.getTable("T.GW_ABSATZ_TAB").definitionToText());
-    console.log(source.getTable("T.GW_ABSATZ_TAB").toText(false));
+    //console.log(source.getTable("T.GW_ABSATZ_TAB").definitionToText());
+    //console.log(source.getTable("T.GW_ABSATZ_TAB").toText(false));
 
     const end = performance.now();
     console.log("Created local Datasets after " + `${end - start} ms`);
 }
 
 function beforeTrans() {
+    const end = performance.now();
+    console.log("Current Time " + `${end} ms`);
     //console.log(source.getTable("T.ABSATZ").toText(false));
 }
 
@@ -30,10 +32,13 @@ function afterTrans() {
 }
 
 function afterEveryTrans(tablename: string) {
-    // if( source.getTable(tablename) != undefined )
-    //     console.log(source.getTable(tablename).toText(false));
-    // else
-    //     console.log("No result table [" + tablename + "] returned");
+    if( source.getTable(tablename) != undefined ) {
+         console.log("Target-Table " + tablename + ` [${source.getTable(tablename).rows.length}]`);
+         console.log(source.getTable(tablename).toText(false));
+    } else
+         console.log("No result table [" + tablename + "] returned");
+    const end = performance.now();
+    console.log("Current Time " + `${end} ms`);
 }
 validateTableDataStructureForm(tableDataStructure);
 

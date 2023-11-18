@@ -123,15 +123,16 @@ export function treeCon(source: DataSource, trans: TransformationTreeConType): s
     }
 }
 
-//Calculates the sum of one column of table "data" with consideration to the given filters
+//Calculates the sum of one cell of table "data" with consideration to the given filters
 function treeConSumIf( data: Table, col_name: string, filterCol: TableMetaDataColFltType[], filterRow: TableMetaDataColFltType[], basisTable: Table, basisRow: Row ) : number {
     let result: number = 0;
     let col_inx: number = data.getColNumberByName(col_name);
 
+    //iterate over all rows in data
     for (let inx = 0; inx < data.rows.length; inx++) {
         let filter_result: boolean = true;
 
-        //Filter of ColumnMetaData
+        //check row for all filter of ColumnMetaData
         for (let inx_filter = 0; filterCol != undefined && inx_filter < filterCol.length; inx_filter++) {
             if( filterCol[inx_filter].FLT_VALUE != undefined && filterCol[inx_filter].FLT_VALUE != data.rows[inx].row[data.getColNumberByName(filterCol[inx_filter].FLT_COL)]) {
                 filter_result = false;
@@ -139,12 +140,14 @@ function treeConSumIf( data: Table, col_name: string, filterCol: TableMetaDataCo
             }
         }
 
-        //Filter of RowMetaData
+        //check row for all filters of RowMetaData
         for (let inx_filter = 0; filterRow != undefined && filter_result && inx_filter < filterRow.length; inx_filter++) {
             if( 
+                //check for direct value in filter
                 (filterRow[inx_filter].FLT_VALUE != undefined && 
                 filterRow[inx_filter].FLT_VALUE != data.rows[inx].row[data.getColNumberByName(filterRow[inx_filter].FLT_COL)] ) 
                 ||
+                //check for value of given column in filter 
                 (filterRow[inx_filter].FLT_VALUE_COLUMN != undefined && 
                 basisRow.row[basisTable.getColNumberByName(filterRow[inx_filter].FLT_VALUE_COLUMN)] != data.rows[inx].row[data.getColNumberByName(filterRow[inx_filter].FLT_COL)])
             )
@@ -165,15 +168,20 @@ function treeCon_intern(data_basis: Table, data_dimension: Table, result_table_n
 
     let result = new Table(result_table_name, data_basis.columns);
 
+    //iterate over all rows in Basis-Table
     for (let inx = 0; inx < data_basis.rows.length; inx++) {
         let row = data_basis.rows[inx];
 
+        //iterate over all columns in Basis-Table
         for ( let col_inx= 0 ; col_inx < data_basis.columns.length ; col_inx++) { 
             
             if( 
+                //check if Transform is mentioned in row metadata
                 data_basis.getMetaData().getRowMetaData(inx,transName) != undefined &&
+                //check if AGG_COL is defined in column metadata
                 data_basis.getMetaData().getColTreeConMetaData(col_inx, transName)?.AGG_COL 
             ) {
+                //filters defined for specific cell in Basis-Table
                 let filterColMeta: TableMetaDataColFltType[] = data_basis.getMetaData().getColTreeConMetaData(col_inx,transName)?.COL_FLT;
                 let filterRowMeta: TableMetaDataColFltType[] = data_basis.getMetaData().getRowTreeConMetaData(inx,transName)?.COL_FLT;
     
@@ -265,10 +273,12 @@ function blowup_intern(data_basis: Table, data_dimension: Table, result_table_na
 }
 
 export function join(source: DataSource, join: TransformationJoinType): string {
-    for (let cond of join.join_conditions) {
-        cond.srcA.col_nr = source.getTable(join.sourceA).columns.find(x => x.name == cond.srcA.col_name).col_nr;
-        cond.srcB.col_nr = source.getTable(join.sourceB).columns.find(x => x.name == cond.srcB.col_name).col_nr;
-    }
+    console.log("Join-Transformation");
+
+    //for (let cond of join.join_conditions) {
+    //    cond.srcA.col_nr = source.getTable(join.sourceA).columns.find(x => x.name == cond.srcA.col_name).col_nr;
+     //   cond.srcB.col_nr = source.getTable(join.sourceB).columns.find(x => x.name == cond.srcB.col_name).col_nr;
+    //}
 
     console.log(join.name + " [" + join.type + "]");
     console.log(join.sourceA + " + " + join.sourceB + " -> " + join.sourceResult);
@@ -284,6 +294,8 @@ export function join(source: DataSource, join: TransformationJoinType): string {
 }
 
 export function order(source: DataSource, order: TransformationOrderType): string {
+    console.log("Order-Transformation");
+
     let result: Table = order_intern(order.sourceResult, source.getTable(order.source), order.order_columns);
     console.log(result.toText(true));
 
@@ -320,6 +332,8 @@ export function order_intern(name: string, data: Table, orderCond: OrderConditio
 }
 
 export function group(source: DataSource, group: TransformationGroupType): string {
+    console.log("Group-Transformation");
+
     // console.log(group.name + " [" + group.type + "]");
     // console.log(group.source + " -> " + group.sourceResult);
     // for (let grp of group.group_columns) {
@@ -441,12 +455,14 @@ export function join_intern(name: string, dataA: Table, dataB: Table, joinCond: 
     let res_columns: ColumnType[] = [];
     let nr: number = 0;
     for (let col of dataA.columns) {
-        let c: ColumnType = { "col_nr": nr, "name": dataA.name + ":" + col.name };
+        //let c: ColumnType = { "col_nr": nr, "name": dataA.name + ":" + col.name };
+        let c: ColumnType = { "name": dataA.name + ":" + col.name };
         res_columns.push(c);
         nr++;
     }
     for (let col of dataB.columns) {
-        let c: ColumnType = { "col_nr": nr, "name": dataB.name + ":" + col.name };
+        //let c: ColumnType = { "col_nr": nr, "name": dataB.name + ":" + col.name };
+        let c: ColumnType = { "name": dataB.name + ":" + col.name };
         res_columns.push(c);
         nr++;
     }

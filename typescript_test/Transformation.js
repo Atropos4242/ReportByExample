@@ -212,10 +212,11 @@ function blowup_intern(data_basis, data_dimension, result_table_name, transName)
     return result;
 }
 function join(source, join) {
-    for (let cond of join.join_conditions) {
-        cond.srcA.col_nr = source.getTable(join.sourceA).columns.find(x => x.name == cond.srcA.col_name).col_nr;
-        cond.srcB.col_nr = source.getTable(join.sourceB).columns.find(x => x.name == cond.srcB.col_name).col_nr;
-    }
+    console.log("Join-Transformation");
+    //for (let cond of join.join_conditions) {
+    //    cond.srcA.col_nr = source.getTable(join.sourceA).columns.find(x => x.name == cond.srcA.col_name).col_nr;
+    //   cond.srcB.col_nr = source.getTable(join.sourceB).columns.find(x => x.name == cond.srcB.col_name).col_nr;
+    //}
     console.log(join.name + " [" + join.type + "]");
     console.log(join.sourceA + " + " + join.sourceB + " -> " + join.sourceResult);
     for (let cond of join.join_conditions) {
@@ -228,6 +229,7 @@ function join(source, join) {
 }
 exports.join = join;
 function order(source, order) {
+    console.log("Order-Transformation");
     let result = order_intern(order.sourceResult, source.getTable(order.source), order.order_columns);
     console.log(result.toText(true));
     return source.addTable(result);
@@ -258,6 +260,7 @@ function order_intern(name, data, orderCond) {
 }
 exports.order_intern = order_intern;
 function group(source, group) {
+    console.log("Group-Transformation");
     // console.log(group.name + " [" + group.type + "]");
     // console.log(group.source + " -> " + group.sourceResult);
     // for (let grp of group.group_columns) {
@@ -368,12 +371,14 @@ function join_intern(name, dataA, dataB, joinCond) {
     let res_columns = [];
     let nr = 0;
     for (let col of dataA.columns) {
-        let c = { "col_nr": nr, "name": dataA.name + ":" + col.name };
+        //let c: ColumnType = { "col_nr": nr, "name": dataA.name + ":" + col.name };
+        let c = { "name": dataA.name + ":" + col.name };
         res_columns.push(c);
         nr++;
     }
     for (let col of dataB.columns) {
-        let c = { "col_nr": nr, "name": dataB.name + ":" + col.name };
+        //let c: ColumnType = { "col_nr": nr, "name": dataB.name + ":" + col.name };
+        let c = { "name": dataB.name + ":" + col.name };
         res_columns.push(c);
         nr++;
     }
